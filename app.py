@@ -4,10 +4,10 @@ import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
-# 1. Configurações Iniciais de Engenharia do App
+# 1. Configurações de Página
 st.set_page_config(page_title="Expert COPSOQ III - Pericia", layout="wide")
 
-# Inicializa a conexão (Busca os dados nos Secrets do Streamlit Cloud)
+# Inicializa a conexão com o Google Sheets (Secrets)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # 2. Interface e Título
@@ -64,7 +64,7 @@ if submit:
     # Prepara DataFrame para o Gráfico de Radar
     df_grafico = pd.DataFrame(list(dados_calculados.items()), columns=['Dimensão', 'Pontuação'])
 
-    # GRAVAÇÃO NO GOOGLE SHEETS (Ocorre em segundo plano)
+    # GRAVAÇÃO NO GOOGLE SHEETS
     try:
         nova_linha = pd.DataFrame([{
             "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
@@ -78,12 +78,14 @@ if submit:
         
         conn.create(data=nova_linha)
         st.success("✅ Avaliação enviada com sucesso! Obrigado pela colaboração.")
+        st.balloons()
         
     except Exception as e:
         st.error(f"Erro técnico na gravação: {e}")
 
     st.markdown("---")
 
-    # 5. ÁREA RESTRITA DO PERITO (O trabalhador não vê o resultado)
+    # 5. ÁREA RESTRITA DO PERITO (Protegida por Senha)
     with st.expander("🔐 Área do Perito (Acesso Restrito)"):
-        # Substitua '1234' pela sua senha pessoal de per
+        # Importante: Estas linhas abaixo estão indentadas corretamente dentro do expander
+        senha_perito = st.text_input("Digite a senha
