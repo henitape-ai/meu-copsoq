@@ -60,7 +60,7 @@ if submit:
     fig = px.line_polar(df, r='Pontuação', theta='Dimensão', line_close=True, range_r=[0,100])
     fig.update_traces(fill='toself', line_color='red')
     
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width='stretch')
     
     # Alerta de Risco para o Perito
     st.warning("**Análise de Risco:** Valores acima de 75 nas áreas de 'Exigências' ou 'Estresse' indicam alta probabilidade de nexo causal para doenças ocupacionais.")
