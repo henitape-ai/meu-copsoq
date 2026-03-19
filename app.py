@@ -7,12 +7,14 @@ from datetime import datetime
 # 1. Configurações de Página
 st.set_page_config(page_title="Expert COPSOQ III - HMM Serviços", layout="wide")
 
-# Inicializa a conexão
+# Inicializa a conexão com o Google Sheets
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# Inicializa o estado da sessão
+# Inicializa o estado da sessão para persistência de dados
 if 'df_grafico' not in st.session_state:
     st.session_state.df_grafico = None
+if 'dados_pericia' not in st.session_state:
+    st.session_state.dados_pericia = None
 
 st.title("📊 Avaliação Psicossocial Avançada - COPSOQ III")
 st.markdown("---")
@@ -31,8 +33,8 @@ escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25,
 
 st.subheader(f"Questionário de Campo - Função: {funcao}")
 
-# 3. Formulário
-with st.form("form_copsoq_v3"):
+# 3. Formulário de Coleta
+with st.form("form_copsoq_vfinal"):
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("#### 1. Exigências e Ritmo")
@@ -55,7 +57,7 @@ with st.form("form_copsoq_v3"):
     
     submit = st.form_submit_button("Finalizar e Gravar Dados")
 
-# 4. Processamento e Gravação
+# 4. Lógica de Gravação (Modo Append para evitar novas abas)
 if submit:
     dados = {
         'Exigências': (escala[p1] + escala[p2]) / 2,
@@ -69,6 +71,7 @@ if submit:
     st.session_state.dados_pericia = dados
 
     try:
+        # Prepara a nova linha
         nova_linha = pd.DataFrame([{
             "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
             "Empresa": empresa, "Setor": setor, "Funcao": funcao,
@@ -76,28 +79,32 @@ if submit:
             "Liderança": dados['Liderança'], "Saude": dados['Saúde'],
             "Inseguranca": dados['Insegurança'], "Significado": dados['Significado']
         }])
-        conn.create(data=nova_linha)
-        st.success(f"✅ Avaliação de {funcao} registrada!")
+        
+        # Lê os dados que já existem na aba fixa "Página1"
+        df_existente = conn.read(worksheet="Página1")
+        
+        # Une o novo dado ao final da lista (Append)
+        df_atualizado = pd.concat([df_existente, nova_linha], ignore_index=True)
+        
+        # Sobrescreve a aba com a lista completa atualizada
+        conn.update(worksheet="Página1", data=df_atualizado)
+        
+        st.success(f"✅ Avaliação de {funcao} registrada com sucesso na Página1!")
         st.balloons()
     except Exception as e:
-        st.error(f"Erro na gravação: {e}")
+        st.error(f"Erro na gravação: {e}. Verifique se a aba se chama 'Página1'.")
 
-# 5. ÁREA RESTRITA (Gráfico Corrigido)
+# 5. ÁREA RESTRITA DO PERITO
 if st.session_state.df_grafico is not None:
     st.markdown("---")
-    with st.expander("🔐 Visualizar Análise Técnica"):
-        senha = st.text_input("Senha:", type="password", key="auth_final")
+    with st.expander("🔐 Visualizar Análise Técnica (Uso do Perito)"):
+        senha = st.text_input("Senha:", type="password", key="auth_final_hmm")
         if senha == "1234":
-            st.subheader(f"📊 Laudo: {funcao} - {empresa}")
+            st.subheader(f"📊 Laudo Técnico: {funcao} - {empresa}")
             
-            # REMOVIDO 'markers=True' para evitar o erro da imagem
             fig = px.line_polar(st.session_state.df_grafico, r='Pontuação', theta='Dimensão', 
                                line_close=True, range_r=[0,100])
             fig.update_traces(fill='toself', line_color='blue')
             st.plotly_chart(fig, use_container_width=True)
             
-            d = st.session_state.dados_pericia
-            resumo = "🚩 ALTO RISCO" if d['Exigências'] > 75 or d['Saúde'] > 75 else "✅ NORMAL"
-            st.info(f"**Parecer:** {resumo} | Saúde: {d['Saúde']} | Exigências: {d['Exigências']}")
-        elif senha != "":
-            st.error("Senha incorreta.")
+            d = st.session_state. 
