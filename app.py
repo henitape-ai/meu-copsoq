@@ -1,8 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from streamlit_gsheets import GSheetsConnection  # Adicionado
+from datetime import datetime                    # Adicionado para registrar a data
 
 st.set_page_config(page_title="Expert COPSOQ III - Perícia", layout="wide")
+
+# Inicializa a conexão com o Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 st.title("📊 Avaliação Psicossocial Completa - COPSOQ III")
 st.markdown("---")
@@ -14,7 +19,6 @@ with st.sidebar:
     setor = st.selectbox("Setor:", ["Produção", "Logística", "Administrativo", "Operacional", "Vendas"])
     st.info("Este questionário é anônimo conforme a LGPD.")
 
-# Definição das Dimensões e Perguntas (Versão Média)
 # Escala: Sempre(100), Frequentemente(75), Às vezes(50), Raramente(25), Nunca(0)
 escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
@@ -41,26 +45,44 @@ with st.form("form_copsoq"):
         p7 = st.radio("Sente-se tenso ou estressado ultimamente?", list(escala.keys()), index=2)
         p8 = st.radio("O trabalho afeta sua vida familiar/pessoal?", list(escala.keys()), index=2)
 
-    submit = st.form_submit_button("Finalizar e Gerar Gráfico")
+    submit = st.form_submit_button("Finalizar e Gravar Dados")
 
 if submit:
     # Cálculo das médias por dimensão
-    dados = {
+    dados_calculados = {
         'Exigências': (escala[p1] + escala[p2]) / 2,
         'Autonomia': (escala[p3] + escala[p4]) / 2,
         'Liderança': (escala[p5] + escala[p6]) / 2,
         'Estresse/Saúde': (escala[p7] + escala[p8]) / 2
     }
     
-    df = pd.DataFrame(list(dados.items()), columns=['Dimensão', 'Pontuação'])
+    df_grafico = pd.DataFrame(list(dados_calculados.items()), columns=['Dimensão', 'Pontuação'])
 
     # Exibição do Gráfico de Radar
     st.success("Cálculos realizados com sucesso!")
     
-    fig = px.line_polar(df, r='Pontuação', theta='Dimensão', line_close=True, range_r=[0,100])
+    fig = px.line_polar(df_grafico, r='Pontuação', theta='Dimensão', line_close=True, range_r=[0,100])
     fig.update_traces(fill='toself', line_color='red')
-    
     st.plotly_chart(fig, width='stretch')
     
-    # Alerta de Risco para o Perito
-    st.warning("**Análise de Risco:** Valores acima de 75 nas áreas de 'Exigências' ou 'Estresse' indicam alta probabilidade de nexo causal para doenças ocupacionais.")
+    st.warning("**Análise de Risco:** Valores acima de 75 nas áreas de 'Exigências' ou 'Estresse' indicam alta probabilidade de nexo causal.")
+
+    # --- NOVO: GRAVAÇÃO DOS DADOS NA PLANILHA ---
+    try:
+        nova_linha = pd.DataFrame([{
+            "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+            "Empresa": empresa,
+            "Setor": setor,
+            "Exigencias": dados_calculados['Exigências'],
+            "Autonomia": dados_calculados['Autonomia'],
+            "Liderança": dados_calculados['Liderança'],
+            "Saude": dados_calculados['Estresse/Saúde']
+        }])
+        
+        # O comando que faltava para enviar ao Drive:
+        conn.create(data=nova_linha)
+        st.balloons()
+        st.info("✅ Dados registrados na Planilha Google com sucesso!")
+        
+    except Exception as e:
+        st.error(f"Erro ao salvar na planilha: {e}")
