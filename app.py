@@ -4,7 +4,7 @@ import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
-# 1. Setup
+# 1. Setup HMM Serviços
 st.set_page_config(page_title="HMM Serviços - Perícia 3.0", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
@@ -16,9 +16,9 @@ st.markdown("---")
 
 with st.sidebar:
     st.header("📋 Dados Técnicos")
-    empresa = st.text_input("Empresa:", "Bela Aurora")
-    setor = st.text_input("Setor:", "Adm.")
-    funcao = st.text_input("Função:", "Auxiliar")
+    empresa = st.text_input("Empresa:", "Vila 02")
+    setor = st.text_input("Setor:", "Oficina")
+    funcao = st.text_input("Função:", "Operador")
     st.divider()
     st.info("HMM Serviços - Itapetininga/SP")
 
@@ -61,7 +61,7 @@ if submit:
     ])
 
     try:
-        # A ordem aqui DEVE ser igual à da sua Linha 1 (10 colunas)
+        # Ordem exata para as 10 colunas da planilha
         nova_linha = pd.DataFrame([{
             "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
             "Empresa": empresa,
@@ -75,7 +75,7 @@ if submit:
             "Significado": v_sig
         }])
         
-        # Lê a Página1 e anexa
+        # Lê a aba Página1 e anexa no final
         df_base = conn.read(worksheet="Página1")
         df_final = pd.concat([df_base, nova_linha], ignore_index=True)
         conn.update(worksheet="Página1", data=df_final)
