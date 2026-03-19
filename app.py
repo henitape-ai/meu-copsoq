@@ -1,29 +1,33 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from streamlit_gsheets import GSheetsConnection  # Adicionado
-from datetime import datetime                    # Adicionado para registrar a data
+from streamlit_gsheets import GSheetsConnection
+from datetime import datetime
 
-st.set_page_config(page_title="Expert COPSOQ III - Perícia", layout="wide")
+# 1. Configurações Iniciais de Engenharia do App
+st.set_page_config(page_title="Expert COPSOQ III - Pericia", layout="wide")
 
-# Inicializa a conexão com o Google Sheets
+# Inicializa a conexão (Busca os dados nos Secrets do Streamlit Cloud)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.title("📊 Avaliação Psicossocial Completa - COPSOQ III")
+# 2. Interface e Título
+st.title("📊 Sistema de Avaliação Psicossocial - COPSOQ III")
 st.markdown("---")
 
-# Configurações de Identificação
+# Barra Lateral para Identificação
 with st.sidebar:
-    st.header("📋 Dados da Avaliação")
+    st.header("📋 Identificação da Perícia")
     empresa = st.text_input("Empresa Sob Avaliação:", "Minha Empresa")
     setor = st.selectbox("Setor:", ["Produção", "Logística", "Administrativo", "Operacional", "Vendas"])
-    st.info("Este questionário é anônimo conforme a LGPD.")
+    st.divider()
+    st.info("Este questionário coleta dados técnicos para análise de nexo causal.")
 
-# Escala: Sempre(100), Frequentemente(75), Às vezes(50), Raramente(25), Nunca(0)
+# Definição da Escala Likert (0 a 100)
 escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-st.subheader(f"Questionário: {setor}")
+st.subheader(f"Questionário Técnico - Setor: {setor}")
 
+# 3. Formulário de Coleta para o Trabalhador
 with st.form("form_copsoq"):
     col1, col2 = st.columns(2)
     
@@ -45,29 +49,22 @@ with st.form("form_copsoq"):
         p7 = st.radio("Sente-se tenso ou estressado ultimamente?", list(escala.keys()), index=2)
         p8 = st.radio("O trabalho afeta sua vida familiar/pessoal?", list(escala.keys()), index=2)
 
-    submit = st.form_submit_button("Finalizar e Gravar Dados")
+    submit = st.form_submit_button("Finalizar Avaliação")
 
+# 4. Lógica de Processamento e Gravação
 if submit:
     # Cálculo das médias por dimensão
     dados_calculados = {
         'Exigências': (escala[p1] + escala[p2]) / 2,
         'Autonomia': (escala[p3] + escala[p4]) / 2,
         'Liderança': (escala[p5] + escala[p6]) / 2,
-        'Estresse/Saúde': (escala[p7] + escala[p8]) / 2
+        'Saúde': (escala[p7] + escala[p8]) / 2
     }
     
+    # Prepara DataFrame para o Gráfico de Radar
     df_grafico = pd.DataFrame(list(dados_calculados.items()), columns=['Dimensão', 'Pontuação'])
 
-    # Exibição do Gráfico de Radar
-    st.success("Cálculos realizados com sucesso!")
-    
-    fig = px.line_polar(df_grafico, r='Pontuação', theta='Dimensão', line_close=True, range_r=[0,100])
-    fig.update_traces(fill='toself', line_color='red')
-    st.plotly_chart(fig, width='stretch')
-    
-    st.warning("**Análise de Risco:** Valores acima de 75 nas áreas de 'Exigências' ou 'Estresse' indicam alta probabilidade de nexo causal.")
-
-    # --- NOVO: GRAVAÇÃO DOS DADOS NA PLANILHA ---
+    # GRAVAÇÃO NO GOOGLE SHEETS (Ocorre em segundo plano)
     try:
         nova_linha = pd.DataFrame([{
             "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
@@ -76,13 +73,17 @@ if submit:
             "Exigencias": dados_calculados['Exigências'],
             "Autonomia": dados_calculados['Autonomia'],
             "Liderança": dados_calculados['Liderança'],
-            "Saude": dados_calculados['Estresse/Saúde']
+            "Saude": dados_calculados['Saúde']
         }])
         
-        # O comando que faltava para enviar ao Drive:
         conn.create(data=nova_linha)
-        st.balloons()
-        st.info("✅ Dados registrados na Planilha Google com sucesso!")
+        st.success("✅ Avaliação enviada com sucesso! Obrigado pela colaboração.")
         
     except Exception as e:
-        st.error(f"Erro ao salvar na planilha: {e}")
+        st.error(f"Erro técnico na gravação: {e}")
+
+    st.markdown("---")
+
+    # 5. ÁREA RESTRITA DO PERITO (O trabalhador não vê o resultado)
+    with st.expander("🔐 Área do Perito (Acesso Restrito)"):
+        # Substitua '1234' pela sua senha pessoal de per
