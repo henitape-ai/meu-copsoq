@@ -16,7 +16,7 @@ st.markdown("---")
 
 tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
 
-# --- ABA 1: COLETA (5 ITENS DE DEMANDA) ---
+# --- ABA 1: COLETA ---
 with tab1:
     st.subheader("📋 Identificação da Unidade")
     c1, c2, c3 = st.columns([2, 1, 1])
@@ -26,7 +26,7 @@ with tab1:
     
     escala_freq = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-    with st.form("form_v22_4"):
+    with st.form("form_v22_final"):
         st.markdown("#### QUESTIONÁRIO DE DIAGNÓSTICO ORGANIZACIONAL")
         col1, col2 = st.columns(2)
         with col1:
@@ -71,59 +71,46 @@ with tab1:
                     df_final = pd.concat([df_base, nova_linha], ignore_index=True)
                     conn.update(worksheet="Página1", data=df_final)
                     st.success("✅ DADOS ENVIADOS!")
-                    st.balloons()
                 except Exception as e: st.error(f"Erro: {e}")
 
 # --- ABA 2: ANÁLISE E RELATÓRIO ---
 with tab2:
-    st.subheader("🔐 Painel de Gestão HMM Serviços")
-    senha = st.text_input("Senha de Acesso:", type="password", key="login_v22_4")
+    st.subheader("🔐 Painel de Gestão HMM")
+    senha = st.text_input("Senha:", type="password", key="login_final")
     if senha == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
-            emp_sel = st.selectbox("Selecione a Empresa:", sorted(df['Empresa'].unique()), index=None)
+            emp_sel = st.selectbox("Empresa:", sorted(df['Empresa'].unique()), index=None)
             if emp_sel:
                 setores = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
-                set_sel = st.multiselect("Filtrar por Setor (Vazio = Geral):", setores)
-                
+                set_sel = st.multiselect("Filtrar por Setor:", setores)
                 df_filtrado = df[df['Empresa'] == emp_sel]
                 if set_sel:
                     df_filtrado = df_filtrado[df_filtrado['Setor'].isin(set_sel)]
                 
-                # Cálculo de Médias de todas as dimensões
                 cols_radar = ['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca', 'Assedio_Moral', 'Assedio_Sexual']
                 medias = df_filtrado[cols_radar].mean()
                 
-                # Exibição de Métricas no topo
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Amostra (N)", len(df_filtrado))
-                c2.metric("Índice de Estresse (Saúde)", f"{medias['Saude']:.1f}")
-                c3.metric("Risco Ético (Máx)", f"{max(medias['Assedio_Moral'], medias['Assedio_Sexual']):.1f}")
-
-                # Gráfico de Radar
-                df_radar = pd.DataFrame(dict(r=medias.values, theta=medias.index))
-                fig = px.line_polar(df_radar, r='r', theta='theta', line_close=True, range_r=[0,100])
+                # Gráfico e Tabela
+                fig = px.line_polar(r=medias.values, theta=medias.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', line_color='red')
                 st.plotly_chart(fig, use_container_width=True)
-
-                # Tabela de Médias Completa (Exibindo todos os itens solicitados)
-                st.markdown("### 📊 Tabela de Médias Detalhada (0-100)")
                 st.dataframe(medias.to_frame(name="Valor Médio").T.style.format("{:.1f}"))
 
                 st.markdown("---")
-                txt_p = "Diagnóstico aponta perfil de [ALTA TENSÃO]. Necessário foco em Compliance e NR-17."
-                conclusao = st.text_area("✍️ Conclusão Técnica do Consultor:", value=txt_p, height=180)
+                conclusao = st.text_area("✍️ Conclusão Técnica:", value="Diagnóstico aponta perfil de [ALTA TENSÃO].", height=150)
                 
-                if st.button("🚀 GERAR RELATÓRIO COMPLETO PARA WORD"):
-                    minuta = f"RELATÓRIO TÉCNICO DE GESTÃO PSICOSSOCIAL\n"
-                    minuta += f"CLIENTE: {emp_sel.upper()}\n"
-                    minuta += f"DATA DA AVALIAÇÃO: {datetime.now().strftime('%d/%m/%Y')}\n"
-                    minuta += "="*60 + "\n\n"
+                if st.button("🚀 GERAR RELATÓRIO"):
+                    # Construção segura da String
+                    minuta = f"RELATÓRIO TÉCNICO - {emp_sel.upper()}\n"
+                    minuta += f"DATA: {datetime.now().strftime('%d/%m/%Y')}\n"
+                    minuta += "="*40 + "\n"
+                    minuta += f"Geral: {len(df_filtrado)} avaliados\n"
+                    minuta += f"Demanda: {medias['Demanda']:.1f} | Controle: {medias['Controle']:.1f}\n"
+                    minuta += f"Suporte: {medias['Suporte']:.1f} | Saúde: {medias['Saude']:.1f}\n"
+                    minuta += f"Insegurança: {medias['Inseguranca']:.1f}\n"
+                    minuta += f"Assédio Moral: {medias['Assedio_Moral']:.1f} | Sexual: {medias['Assedio_Sexual']:.1f}\n"
+                    minuta += "="*40 + "\n\nCONCLUSÃO:\n" + conclusao + "\n\nEng. Henrique - HMM"
                     
-                    # Relatório por Setor (Se houver filtro ou lista completa)
-                    setores_finais = set_sel if set_sel else setores
-                    for s in setores_finais:
-                        df_s = df[(df['Empresa'] == emp_sel) & (df['Setor'] == s)]
-                        m = df_s[cols_radar].mean()
-                        minuta += f"ANÁLISE SETORIAL: {s.upper()} (N={len(df_s)})\n"
-                        minuta +=
+                    st.text_area("COPIE PARA O WORD:", minuta, height=400)
+        else: st.warning("Sem dados.")
