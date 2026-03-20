@@ -5,49 +5,48 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão
-st.set_page_config(page_title="HMM Serviços - Perícia 4.0", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Perícia 5.0", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# Inicializa estados de memória
 if 'df_radar' not in st.session_state:
     st.session_state.df_radar = None
 
 st.title("📊 Protocolo COPSOQ III - Gestão de Riscos Ocupacionais")
 st.markdown("---")
 
-# 2. Interface Principal: Coleta de Dados (Aba 1) e Relatórios (Aba 2)
-tab1, tab2 = st.tabs(["📝 Nova Avaliação", "📄 Gerador de Relatórios"])
+# 2. Interface Principal
+tab1, tab2 = st.tabs(["📝 Nova Avaliação", "🔐 Gerador de Relatórios (Restrito)"])
 
+# --- ABA 1: COLETA DE DADOS ---
 with tab1:
     with st.sidebar:
-        st.header("📋 Identificação")
-        empresa = st.text_input("Empresa Avaliada:", "Empresa Exemplo")
+        st.header("📋 Identificação de Campo")
+        empresa = st.text_input("Empresa Avaliada:", "Nome da Empresa")
         setor = st.text_input("Setor:")
         funcao = st.text_input("Função/Cargo:")
         st.divider()
-        st.info("HMM Serviços - Itapetininga/SP\nEngenharia e Perícias Judiciais")
+        st.info("HMM Serviços - Itapetininga/SP")
 
     escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-    st.subheader(f"Avaliação de Campo: {funcao}")
-    with st.form("form_pericial_completo"):
+    with st.form("form_coleta"):
         c1, c2 = st.columns(2)
         with c1:
             st.markdown("#### 📈 Demandas")
             p1 = st.radio("O ritmo de trabalho é intenso?", list(escala.keys()), index=2)
-            p2 = st.radio("As tarefas são emocionalmente desgastantes?", list(escala.keys()), index=2)
+            p2 = st.radio("Tarefas emocionalmente desgastantes?", list(escala.keys()), index=2)
             st.markdown("#### 🛠️ Controle")
-            p3 = st.radio("Você tem influência sobre as decisões?", list(escala.keys()), index=2)
-            p4 = st.radio("O trabalho permite aprender coisas novas?", list(escala.keys()), index=2)
+            p3 = st.radio("Tem influência sobre as decisões?", list(escala.keys()), index=2)
+            p4 = st.radio("Trabalho permite aprender coisas novas?", list(escala.keys()), index=2)
         with c2:
             st.markdown("#### 🤝 Suporte Social")
-            p5 = st.radio("Recebe apoio da chefia quando precisa?", list(escala.keys()), index=2)
-            p6 = st.radio("Há colaboração entre os colegas?", list(escala.keys()), index=2)
+            p5 = st.radio("Recebe apoio da chefia?", list(escala.keys()), index=2)
+            p6 = st.radio("Colaboração entre colegas?", list(escala.keys()), index=2)
             st.markdown("#### ⚠️ Saúde e Insegurança")
-            p7 = st.radio("Sente-se tenso ou estressado ultimamente?", list(escala.keys()), index=2)
-            p9 = st.radio("Tem receio de ser demitido em breve?", list(escala.keys()), index=2)
-
-        submit = st.form_submit_button("Registrar e Enviar Avaliação")
+            p7 = st.radio("Sente-se tenso/estressado?", list(escala.keys()), index=2)
+            p9 = st.radio("Medo de perder o emprego?", list(escala.keys()), index=2)
+        
+        submit = st.form_submit_button("Registrar na Planilha")
 
     if submit:
         v_dem = (escala[p1] + escala[p2]) / 2
@@ -57,12 +56,6 @@ with tab1:
         v_ins = escala[p9]
         v_sig = 50 
 
-        st.session_state.df_radar = pd.DataFrame([
-            {'Dimensão': 'Demanda', 'Score': v_dem}, {'Dimensão': 'Controle', 'Score': v_con},
-            {'Dimensão': 'Suporte', 'Score': v_sup}, {'Dimensão': 'Saúde', 'Score': v_sau},
-            {'Dimensão': 'Insegurança', 'Score': v_ins}
-        ])
-
         try:
             nova_linha = pd.DataFrame([{
                 "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
@@ -70,80 +63,86 @@ with tab1:
                 "Demanda": v_dem, "Controle": v_con, "Suporte": v_sup, 
                 "Saude": v_sau, "Inseguranca": v_ins, "Significado": v_sig
             }])
-            
             df_base = conn.read(worksheet="Página1", ttl=0)
             df_final = pd.concat([df_base, nova_linha], ignore_index=True)
             conn.update(worksheet="Página1", data=df_final)
-            
-            st.success(f"✅ Avaliação de {funcao} gravada com sucesso!")
+            st.success("✅ Gravado com sucesso!")
             st.balloons()
         except Exception as e:
-            if "200" in str(e):
-                st.success("✅ Dados enviados com sucesso (Resposta 200)!")
-                st.balloons()
-            else:
-                st.error(f"Erro na Gravação: {e}")
+            if "200" in str(e): st.success("✅ Enviado!")
+            else: st.error(f"Erro: {e}")
 
-    # Gráfico de Radar na tela de coleta
-    if st.session_state.df_radar is not None:
-        with st.expander("📊 Visualização Rápida (Radar)"):
-            fig = px.line_polar(st.session_state.df_radar, r='Score', theta='Dimensão', line_close=True, range_r=[0,100])
-            fig.update_traces(fill='toself', line_color='red')
-            st.plotly_chart(fig, use_container_width=True)
-
-# 3. Aba 2: Busca na Planilha e Geração de Texto para o Laudo
+# --- ABA 2: GERADOR COM SENHA E HIERARQUIA ---
 with tab2:
-    st.subheader("📄 Gerador de Texto para Laudo Pericial")
-    try:
-        # Lê a planilha em tempo real para buscar os nomes
-        df_historico = conn.read(worksheet="Página1", ttl=0)
-        
-        if not df_historico.empty:
-            col_a, col_b = st.columns(2)
-            empresas_disponiveis = df_historico['Empresa'].unique()
-            empresa_escolhida = col_a.selectbox("Selecione a Empresa:", empresas_disponiveis)
+    st.subheader("🔑 Acesso Restrito ao Perito")
+    senha = st.text_input("Digite a senha para acessar o banco de dados:", type="password")
+
+    if senha == "HMM2024": # Altere sua senha aqui
+        try:
+            df_h = conn.read(worksheet="Página1", ttl=0)
             
-            # Filtra por empresa para facilitar a busca do funcionário
-            df_func = df_historico[df_historico['Empresa'] == empresa_escolhida]
-            identificador = df_func['Funcao'] + " (" + df_func['Data'] + ")"
-            func_escolhido = col_b.selectbox("Selecione o Periciado:", identificador)
-
-            if st.button("Gerar Relatório Técnico"):
-                # Localiza a linha exata
-                linha_dados = df_func[identificador == func_escolhido].iloc[0]
+            if not df_h.empty:
+                st.info("Filtre os dados abaixo para gerar o relatório específico.")
                 
-                # Lógica do Parecer (Modelo de Karasek)
-                parecer = "✅ EQUILÍBRIO FUNCIONAL: O posto de trabalho apresenta equilíbrio entre exigências e recursos."
-                if linha_dados['Demanda'] > 66 and linha_dados['Controle'] < 40:
-                    parecer = "🚩 RISCO CRÍTICO (ALTA TENSÃO): Ambiente patogênico com alta demanda e baixo controle."
-                elif linha_dados['Saude'] > 66:
-                    parecer = "⚠️ ALERTA: Níveis elevados de estresse percebido."
+                # Nível 1: Empresa
+                list_emp = sorted(df_h['Empresa'].unique())
+                emp_sel = st.selectbox("1. Selecione a Empresa:", list_emp)
+                
+                # Nível 2: Setor (Filtrado pela Empresa)
+                df_setores = df_h[df_h['Empresa'] == emp_sel]
+                list_set = sorted(df_setores['Setor'].unique())
+                set_sel = st.selectbox("2. Selecione o Setor:", list_set)
+                
+                # Nível 3: Funcionário/Data (Filtrado pelo Setor)
+                df_final_sel = df_setores[df_setores['Setor'] == set_sel]
+                id_label = df_final_sel['Funcao'] + " (Data: " + df_final_sel['Data'] + ")"
+                func_sel = st.selectbox("3. Selecione a Avaliação:", id_label)
 
-                relatorio_texto = f"""
-RESUMO DA AVALIAÇÃO PSICOSSOCIAL - HMM SERVIÇOS
---------------------------------------------------
-IDENTIFICAÇÃO:
-Empresa: {linha_dados['Empresa']}
-Setor/Função: {linha_dados['Setor']} / {linha_dados['Funcao']}
-Data da Coleta: {linha_dados['Data']}
+                if st.button("Gerar Relatório Estruturado"):
+                    # Puxa os dados da linha escolhida
+                    d = df_final_sel[id_label == func_sel].iloc[0]
+                    
+                    # Lógica de Classificação Karasek
+                    status = "EQUILÍBRIO"
+                    if d['Demanda'] > 60 and d['Controle'] < 40: status = "ALTA TENSÃO (RISCO)"
+                    
+                    texto = f"""
+RELATÓRIO DE AVALIAÇÃO PSICOSSOCIAL - HMM SERVIÇOS
+---------------------------------------------------------
+EMPRESA: {d['Empresa']}
+SETOR ANALISADO: {d['Setor']}
+FUNÇÃO/CARGO: {d['Funcao']}
+DATA: {d['Data']}
+---------------------------------------------------------
+RESULTADOS QUANTITATIVOS (COPSOQ III):
+- Demanda Psicológica: {d['Demanda']} pts
+- Controle/Autonomia: {d['Controle']} pts
+- Suporte Social: {d['Suporte']} pts
+- Estresse Percebido: {d['Saude']} pts
+- Insegurança Ocupacional: {d['Inseguranca']} pts
 
-RESULTADOS COPSOQ III (Escala 0-100 pts):
-- Demandas do Trabalho: {linha_dados['Demanda']} pts
-- Controle e Autonomia: {linha_dados['Controle']} pts
-- Suporte Social: {linha_dados['Suporte']} pts
-- Estresse/Saúde: {linha_dados['Saude']} pts
-- Insegurança Ocupacional: {linha_dados['Inseguranca']} pts
+PARECER TÉCNICO PRELIMINAR:
+Status: {status}
 
-ANÁLISE TÉCNICA:
-{parecer}
-
-Fundamentação: Avaliação baseada no protocolo internacional COPSOQ III. 
-Scores acima de 66 em Demandas ou abaixo de 33 em Controle/Suporte 
-indicam necessidade de intervenção imediata conforme NR-1 e NR-17.
---------------------------------------------------
-                """
-                st.text_area("Copie o texto abaixo para o seu Laudo (Word/PDF):", relatorio_texto, height=450)
-        else:
-            st.info("Nenhum dado encontrado na planilha ainda.")
-    except Exception as e:
-        st.error(f"Erro ao acessar banco de dados: {e}")
+O presente documento resume os fatores psicossociais do 
+trabalhador no setor {d['Setor']}. Recomenda-se análise da 
+NR-17 caso os níveis de demanda superem 60 pontos.
+---------------------------------------------------------
+                    """
+                    st.text_area("Texto pronto para cópia:", texto, height=400)
+                    
+                    # Radar individual no relatório
+                    st.markdown("### Gráfico Polar do Setor")
+                    df_radar = pd.DataFrame([
+                        {'D': 'Demanda', 'S': d['Demanda']}, {'D': 'Controle', 'S': d['Controle']},
+                        {'D': 'Suporte', 'S': d['Suporte']}, {'D': 'Saúde', 'S': d['Saude']},
+                        {'D': 'Insegurança', 'S': d['Inseguranca']}
+                    ])
+                    fig = px.line_polar(df_radar, r='S', theta='D', line_close=True, range_r=[0,100])
+                    st.plotly_chart(fig)
+            else:
+                st.warning("Nenhum dado encontrado na planilha.")
+        except Exception as e:
+            st.error(f"Erro de conexão: {e}")
+    elif senha != "":
+        st.error("Senha incorreta. Acesso negado.")
