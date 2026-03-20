@@ -28,33 +28,37 @@ with tab1:
 
     with st.form("form_coleta_v11"):
         st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
+        # Texto menor e discreto abaixo do título
+        st.caption("🔒 Esta avaliação é anônima e sigilosa. Os dados são processados coletivamente para diagnóstico organizacional.")
+        
+        st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("### 1. DEMANDAS")
             p1 = st.radio("O RITMO DE TRABALHO É INTENSO?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             p2 = st.radio("AS TAREFAS SÃO EMOCIONALMENTE DESGASTANTES?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             st.markdown("### 2. CONTROLE")
             p3 = st.radio("VOCÊ TEM INFLUÊNCIA SOBRE AS DECISÕES NO TRABALHO?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             p4 = st.radio("O TRABALHO PERMITE APRENDER NOVAS HABILIDADES?", list(escala.keys()), index=2)
             
         with col2:
             st.markdown("### 3. SUPORTE SOCIAL")
             p5 = st.radio("RECEBE APOIO DA CHEFIA QUANDO PRECISA?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             p6 = st.radio("HÁ COLABORAÇÃO ENTRE OS COLEGAS?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             st.markdown("### 4. SAÚDE E INSEGURANÇA")
             p7 = st.radio("SENTE-SE TENSO OU ESTRESSADO ULTIMAMENTE?", list(escala.keys()), index=2)
-            st.markdown("<br>", unsafe_allow_html=True) # Espaço
+            st.markdown("<br>", unsafe_allow_html=True)
             
             p9 = st.radio("TEM RECEIO DE SER DEMITIDO EM BREVE?", list(escala.keys()), index=2)
         
@@ -83,10 +87,10 @@ with tab1:
             }])
             df_b = conn.read(worksheet="Página1", ttl=0)
             conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-            st.success(f"DADOS DE {funcao.upper()} GRAVADOS!")
+            st.success(f"DADOS DE {funcao.upper()} GRAVADOS COM SUCESSO!")
             st.balloons()
         except Exception as e:
-            if "200" in str(e): st.success("DIAGNÓSTICO ENVIADO!")
+            if "200" in str(e): st.success("DIAGNÓSTICO ENVIADO COM SUCESSO!")
             else: st.error(f"Erro: {e}")
 
 # --- ABA 2: PAINEL DE ANÁLISE E LAUDO ---
@@ -122,16 +126,4 @@ with tab2:
                 with col_metrics:
                     st.write("**MÉDIAS DO SETOR:**")
                     st.dataframe(m)
-                    st.metric("AMOSTRA (N)", len(df_set))
-
-                # Lógica de Relatório
-                status = "ESTÁVEL"
-                if m['Demanda'] > 60 and m['Controle'] < 40: status = "CRÍTICO (Alta Tensão)"
-                
-                relatorio = f"EMPRESA: {emp_sel.upper()} | SETOR: {set_sel.upper()}\nDATA: {datetime.now().strftime('%d/%m/%Y')}\nDIAGNÓSTICO: {status}"
-                st.text_area("TEXTO PARA O LAUDO:", relatorio, height=300)
-                
-            else:
-                st.warning("BANCO DE DADOS VAZIO.")
-        except Exception as e:
-            st.error(f"Erro: {e}")
+                    st.metric("AMOSTRA (N
