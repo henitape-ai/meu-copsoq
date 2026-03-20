@@ -5,12 +5,12 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES HMM SERVIÇOS
-st.set_page_config(page_title="HMM Serviços - Gestão Psicossocial", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Avaliação Psicossocial", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
 st.title("Avaliação de Riscos Psicossociais - COPSOQ III")
-st.subheader("HMM Serviços - Engenharia de Segurança e Gestão Ocupacional")
+st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho e Meio Ambiente")
 st.markdown("""
 **Responsável Técnico:** Eng. Henrique Motta de Miranda
 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) | Itapetininga/ SP
@@ -59,7 +59,7 @@ with tab1:
             p4_2 = st.radio("4.2 Você tem receio quanto à estabilidade no seu emprego?", list(esc.keys()), index=None)
             
             st.markdown("### 5. AMBIENTE ÉTICO (COMPLIANCE)")
-            p5_1 = st.radio("5.1 No último ano, voçe foi exposto a situações de humilhação ou insultos?", list(esc.keys()), index=None)
+            p5_1 = st.radio("5.1 No último ano, você foi exposto a situações de humilhação ou insultos?", list(esc.keys()), index=None)
             p5_2 = st.radio("5.2 Foi alvo de comentários ou avanços sexuais indesejados?", list(esc.keys()), index=None)
         
         if st.form_submit_button("✅ SALVAR AVALIAÇÃO"):
