@@ -31,28 +31,28 @@ with tab1:
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### DEMANDAS")
+            st.markdown("### 1. DEMANDAS")
             p1 = st.radio("O RITMO DE TRABALHO É INTENSO?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p2 = st.radio("AS TAREFAS SÃO EMOCIONALMENTE DESGASTANTES?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
-            st.markdown("### CONTROLE")
+            st.markdown("### 2. CONTROLE")
             p3 = st.radio("VOCÊ TEM INFLUÊNCIA SOBRE AS DECISÕES NO TRABALHO?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p4 = st.radio("O TRABALHO PERMITE APRENDER NOVAS HABILIDADES?", list(escala.keys()), index=2)
             
         with col2:
-            st.markdown("### SUPORTE SOCIAL")
+            st.markdown("### 3. SUPORTE SOCIAL")
             p5 = st.radio("RECEBE APOIO DA CHEFIA QUANDO PRECISA?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p6 = st.radio("HÁ COLABORAÇÃO ENTRE OS COLEGAS?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
-            st.markdown("### SAÚDE E INSEGURANÇA")
+            st.markdown("### 4. SAÚDE E INSEGURANÇA")
             p7 = st.radio("SENTE-SE TENSO OU ESTRESSADO ULTIMAMENTE?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
