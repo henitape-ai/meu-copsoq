@@ -5,13 +5,13 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão
-st.set_page_config(page_title="HMM Serviços - Perícia Mobile", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Mobile", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 if 'df_radar' not in st.session_state:
     st.session_state.df_radar = None
 
-st.title("📊 Protocolo COPSOQ III - HMM Serviços")
+st.title("📊 Avaliação Psicossocial COPSOQ III - HMM Serviços")
 st.markdown("---")
 
 # 2. Interface Principal em Abas
@@ -19,7 +19,7 @@ tab1, tab2 = st.tabs(["📝 Nova Avaliação", "🔐 Gerador de Relatórios"])
 
 # --- ABA 1: COLETA DE DADOS (VISÍVEL NO CELULAR) ---
 with tab1:
-    st.subheader("📋 Identificação da Perícia")
+    st.subheader("📋 Identificação da Avaliação")
     
     # Campos agora no corpo principal para facilitar no celular
     col_id1, col_id2, col_id3 = st.columns([2, 1, 1])
