@@ -4,7 +4,7 @@ import plotly.express as px
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
-# 1. CONFIGURAÇÕES DE ENGENHARIA E CONEXÃO
+# 1. CONFIGURAÇÕES DE ENGENHARIA E CONEXÃO HMM
 st.set_page_config(page_title="HMM Serviços - Gestão Psicossocial", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
@@ -16,7 +16,7 @@ st.markdown("---")
 
 tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
 
-# --- ABA 1: COLETA ---
+# --- ABA 1: COLETA (5 ITENS DE DEMANDA CONFORME FICHA) ---
 with tab1:
     st.subheader("📋 Identificação da Unidade")
     c1, c2, c3 = st.columns([2, 1, 1])
@@ -26,7 +26,7 @@ with tab1:
     
     escala_freq = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-    with st.form("form_v22_final"):
+    with st.form("form_v22_5"):
         st.markdown("#### QUESTIONÁRIO DE DIAGNÓSTICO ORGANIZACIONAL")
         col1, col2 = st.columns(2)
         with col1:
@@ -61,56 +61,7 @@ with tab1:
                     v_sup = (escala_freq[p3_1]+escala_freq[p3_2])/2
                     nova_linha = pd.DataFrame([{
                         "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                        "Empresa": empresa, "Setor": setor, "Funcao": funcao,
+                        "Empresa": empresa.strip(), "Setor": setor.strip(), "Funcao": funcao.strip(),
                         "Demanda": v_dem, "Controle": v_con, "Suporte": v_sup,
                         "Saude": escala_freq[p4_1], "Inseguranca": escala_freq[p4_2],
-                        "Assedio_Moral": escala_freq[p5_1], "Assedio_Sexual": escala_freq[p5_2],
-                        "Status": "Finalizado", "Metodo": "COPSOQ III"
-                    }])
-                    df_base = conn.read(worksheet="Página1", ttl=0)
-                    df_final = pd.concat([df_base, nova_linha], ignore_index=True)
-                    conn.update(worksheet="Página1", data=df_final)
-                    st.success("✅ DADOS ENVIADOS!")
-                except Exception as e: st.error(f"Erro: {e}")
-
-# --- ABA 2: ANÁLISE E RELATÓRIO ---
-with tab2:
-    st.subheader("🔐 Painel de Gestão HMM")
-    senha = st.text_input("Senha:", type="password", key="login_final")
-    if senha == "HMM2024":
-        df = conn.read(worksheet="Página1", ttl=0)
-        if not df.empty:
-            emp_sel = st.selectbox("Empresa:", sorted(df['Empresa'].unique()), index=None)
-            if emp_sel:
-                setores = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
-                set_sel = st.multiselect("Filtrar por Setor:", setores)
-                df_filtrado = df[df['Empresa'] == emp_sel]
-                if set_sel:
-                    df_filtrado = df_filtrado[df_filtrado['Setor'].isin(set_sel)]
-                
-                cols_radar = ['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca', 'Assedio_Moral', 'Assedio_Sexual']
-                medias = df_filtrado[cols_radar].mean()
-                
-                # Gráfico e Tabela
-                fig = px.line_polar(r=medias.values, theta=medias.index, line_close=True, range_r=[0,100])
-                fig.update_traces(fill='toself', line_color='red')
-                st.plotly_chart(fig, use_container_width=True)
-                st.dataframe(medias.to_frame(name="Valor Médio").T.style.format("{:.1f}"))
-
-                st.markdown("---")
-                conclusao = st.text_area("✍️ Conclusão Técnica:", value="Diagnóstico aponta perfil de [ALTA TENSÃO].", height=150)
-                
-                if st.button("🚀 GERAR RELATÓRIO"):
-                    # Construção segura da String
-                    minuta = f"RELATÓRIO TÉCNICO - {emp_sel.upper()}\n"
-                    minuta += f"DATA: {datetime.now().strftime('%d/%m/%Y')}\n"
-                    minuta += "="*40 + "\n"
-                    minuta += f"Geral: {len(df_filtrado)} avaliados\n"
-                    minuta += f"Demanda: {medias['Demanda']:.1f} | Controle: {medias['Controle']:.1f}\n"
-                    minuta += f"Suporte: {medias['Suporte']:.1f} | Saúde: {medias['Saude']:.1f}\n"
-                    minuta += f"Insegurança: {medias['Inseguranca']:.1f}\n"
-                    minuta += f"Assédio Moral: {medias['Assedio_Moral']:.1f} | Sexual: {medias['Assedio_Sexual']:.1f}\n"
-                    minuta += "="*40 + "\n\nCONCLUSÃO:\n" + conclusao + "\n\nEng. Henrique - HMM"
-                    
-                    st.text_area("COPIE PARA O WORD:", minuta, height=400)
-        else: st.warning("Sem dados.")
+                        "Assedio_Moral": escala_freq[p5_1], "Assedio_
