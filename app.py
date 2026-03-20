@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão HMM
-st.set_page_config(page_title="HMM Serviços - Perícia 11.1", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Perícia 11.2", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 st.title("Avaliação Psicossocial COPSOQ - HMM Serviços")
@@ -28,7 +28,6 @@ with tab1:
 
     with st.form("form_coleta_v11"):
         st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
-        # Texto de anonimato menor que o título
         st.caption("🔒 Esta avaliação é anônima e sigilosa. Os dados são processados coletivamente para diagnóstico organizacional.")
         
         st.markdown("<br>", unsafe_allow_html=True)
@@ -90,8 +89,7 @@ with tab1:
             st.success(f"DADOS DE {funcao.upper()} GRAVADOS COM SUCESSO!")
             st.balloons()
         except Exception as e:
-            if "200" in str(e): st.success("DIAGNÓSTICO ENVIADO COM SUCESSO!")
-            else: st.error(f"Erro: {e}")
+            st.error(f"Erro na gravação: {e}")
 
 # --- ABA 2: PAINEL DE ANÁLISE E LAUDO ---
 with tab2:
@@ -130,4 +128,13 @@ with tab2:
 
                 # Lógica de Relatório
                 status = "ESTÁVEL"
-                if m['Demanda'] > 60 and m['Controle'] < 40: status
+                if m['Demanda'] > 60 and m['Controle'] < 40: 
+                    status = "CRÍTICO (Alta Tensão)"
+                
+                relatorio = f"EMPRESA: {emp_sel.upper()} | SETOR: {set_sel.upper()}\nDATA: {datetime.now().strftime('%d/%m/%Y')}\nDIAGNÓSTICO: {status}"
+                st.text_area("TEXTO PARA O LAUDO:", relatorio, height=300)
+                
+            else:
+                st.warning("BANCO DE DADOS VAZIO.")
+        except Exception as e:
+            st.error(f"Erro no processamento dos dados: {e}")
