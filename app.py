@@ -5,24 +5,24 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão HMM
-st.set_page_config(page_title="HMM Serviços - Perícia 10.1", layout="wide")
+st.set_page_config(page_title="HMM Serviços", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.title("📊 Protocolo COPSOQ III - HMM Serviços")
+st.title("📊 Avaliação Psicossocial COPSOQ - HMM Serviços")
 st.markdown("---")
 
 # 2. Navegação por Abas (Mobile e Desktop)
-tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Laudo"])
+tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise"])
 
 # --- ABA 1: COLETA DE DADOS EM CAMPO ---
 with tab1:
-    st.subheader("📋 Identificação da Perícia")
+    st.subheader("📋 Identificação da Avaliação")
     
     # Identificação visível no corpo principal
     c_id1, c_id2, c_id3 = st.columns([2, 1, 1])
     with c_id1: empresa = st.text_input("Empresa Avaliada:", "Nome da Empresa")
     with c_id2: setor = st.text_input("Setor:")
-    with c_id3: funcao = st.text_input("Função/Cargo:")
+    with c_id3: funcao = st.text_input("Função/ Cargo:")
     
     st.markdown("---")
     escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
@@ -121,7 +121,7 @@ with tab2:
                     explicacao = "O ritmo e carga de trabalho exigem atenção."
 
                 relatorio = f"""
-RESUMO PERICIAL - HMM SERVIÇOS
+RESUMO AVALIAÇÃO
 --------------------------------------------------
 EMPRESA: {emp_sel} | SETOR: {set_sel}
 DATA: {datetime.now().strftime("%d/%m/%Y")}
