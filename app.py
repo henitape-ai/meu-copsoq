@@ -8,21 +8,15 @@ from datetime import datetime
 st.set_page_config(page_title="HMM Serviços - Perícia 9.0", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# Inicializa estado para o radar de visualização rápida
-if 'radar_preview' not in st.session_state:
-    st.session_state.radar_preview = None
-
 st.title("📊 Protocolo COPSOQ III - HMM Serviços")
 st.markdown("---")
 
-# 2. Navegação por Abas (Otimizado para Mobile)
+# 2. Navegação por Abas
 tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Laudo"])
 
-# --- ABA 1: COLETA DE DADOS EM CAMPO ---
+# --- ABA 1: COLETA DE DADOS ---
 with tab1:
     st.subheader("📋 Identificação da Perícia")
-    
-    # Identificação visível no celular (Corpo Principal)
     c_id1, c_id2, c_id3 = st.columns([2, 1, 1])
     with c_id1: empresa = st.text_input("Empresa Avaliada:", "Nome da Empresa")
     with c_id2: setor = st.text_input("Setor:")
@@ -52,13 +46,11 @@ with tab1:
         submit = st.form_submit_button("Finalizar e Gravar na Planilha")
 
     if submit:
-        # Cálculos Técnicos
         v_dem = (escala[p1] + escala[p2]) / 2
         v_con = (escala[p3] + escala[p4]) / 2
         v_sup = (escala[p5] + escala[p6]) / 2
         v_sau, v_ins = escala[p7], escala[p9]
 
-        # Diagnóstico para a Planilha
         classif = "Baixo Risco"
         if v_dem > 60 and v_con < 40: classif = "ALTO RISCO (Alta Tensão)"
         elif v_dem > 60 or v_sau > 60: classif = "Risco Moderado"
@@ -79,7 +71,7 @@ with tab1:
             if "200" in str(e): st.success("✅ Enviado (API 200)")
             else: st.error(f"Erro: {e}")
 
-# --- ABA 2: PAINEL DE ANÁLISE E LAUDO TÉCNICO ---
+# --- ABA 2: PAINEL DE ANÁLISE E LAUDO ---
 with tab2:
     st.subheader("🔐 Painel de Análise e Laudo Técnico")
     senha = st.text_input("Senha de Acesso:", type="password", key="login_final")
@@ -88,7 +80,6 @@ with tab2:
         try:
             df = conn.read(worksheet="Página1", ttl=0)
             if not df.empty:
-                # Filtros Hierárquicos
                 c_f1, c_f2 = st.columns(2)
                 with c_f1:
                     lista_emp = sorted(df['Empresa'].unique())
@@ -99,10 +90,8 @@ with tab2:
                     set_sel = st.selectbox("2. Selecione o Setor:", lista_set)
                     df_set = df_emp[df_emp['Setor'] == set_sel]
 
-                # Cálculos de Média do Setor selecionado
                 m = df_set[['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca']].mean()
                 
-                # Visualização Gráfica
                 st.markdown(f"### 📊 Diagnóstico do Setor: {set_sel}")
                 col_radar, col_metrics = st.columns([2, 1])
                 
@@ -113,3 +102,26 @@ with tab2:
                     st.plotly_chart(fig, use_container_width=True)
                 
                 with col_metrics:
+                    st.write("**Médias do Grupo:**")
+                    st.dataframe(m)
+                    st.metric("Amostra (N)", len(df_set))
+
+                status = "ESTÁVEL"
+                explicacao = "Índices em zona de equilíbrio organizacional."
+                critico = False
+                
+                if m['Demanda'] > 60 and m['Controle'] < 40:
+                    status = "CRÍTICO (Alta Tensão)"
+                    explicacao = "Setor com Alta Demanda e Baixo Controle. Risco máximo de adoecimento conforme Karasek."
+                    critico = True
+                elif m['Demanda'] > 60:
+                    status = "ALERTA (Sobrecarga)"
+                    explicacao = "Demanda elevada pode gerar fadiga crônica."
+
+                relatorio = f"EMPRESA: {emp_sel} | SETOR: {set_sel}\nDIAGNÓSTICO: {status}\nFUNDAMENTAÇÃO: {explicacao}"
+                st.text_area("Texto para o Laudo:", relatorio, height=300)
+                
+            else:
+                st.warning("Sem dados cadastrados.")
+        except Exception as e:
+            st.error(f"Erro: {e}")
