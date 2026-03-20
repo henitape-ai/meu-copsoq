@@ -25,8 +25,7 @@ with tab1:
     
     # FRASE DE ANONIMATO SOLICITADA
     st.info("⚠️ **IMPORTANTE:** Este diagnóstico e avaliação são **estritamente anônimos**. "
-            "Os dados são processados de forma coletiva pela HMM Serviços para fins de "
-            "melhoria do ambiente de trabalho, sem identificação individual dos respondentes.")
+            "Os dados serão processados de forma coletiva, sem identificação individual dos respondentes.")
     
     c1, c2, c3 = st.columns([2, 1, 1])
     with c1: emp = st.text_input("Empresa Cliente:", placeholder="Ex: SENAC ou Mercado do Zé")
