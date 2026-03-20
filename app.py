@@ -5,12 +5,12 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão HMM
-st.set_page_config(page_title="HMM Serviços - Protocolo COPSOQ III", layout="wide")
+st.set_page_config(page_title="Avaliação Psicossocial - Protocolo COPSOQ III", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO INSTITUCIONAL ---
 st.title("Avaliação de Riscos Psicossociais")
-st.subheader("HMM Serviços - Engenharia e Perícias")
+st.subheader("HMM Serviços - Segurança do Trabalho e Meio Ambiente")
 st.caption("🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
@@ -19,7 +19,7 @@ tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise"])
 
 # --- ABA 1: COLETA DE DADOS (QUESTIONÁRIO OFICIAL) ---
 with tab1:
-    st.subheader("📋 Identificação da Avaliação")
+    st.subheader("Identificação da Avaliação")
     
     c_id1, c_id2, c_id3 = st.columns([2, 1, 1])
     with c_id1: empresa = st.text_input("Empresa Avaliada:", placeholder="Nome da Unidade/Cliente")
@@ -113,7 +113,7 @@ with tab1:
 
 # --- ABA 2: PAINEL DE ANÁLISE ---
 with tab2:
-    st.subheader("🔐 Gestão de Riscos Psicossociais")
+    st.subheader("Gestão de Riscos Psicossociais")
     senha = st.text_input("Senha de Acesso:", type="password", key="login_v15")
 
     if senha == "HMM2024":
