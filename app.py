@@ -9,13 +9,13 @@ st.set_page_config(page_title="HMM Serviços - Portal de Avaliação", layout="w
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO INSTITUCIONAL ---
-st.title("Avaliação Psicossocial COPSOQ")
+st.title("Avaliação Psicossocial - COPSOQ")
 st.subheader("HMM Serviços")
 st.caption("🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
 # 2. Navegação por Abas
-tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Laudo"])
+tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Resultdos"])
 
 # --- ABA 1: COLETA DE DADOS ---
 with tab1:
@@ -31,7 +31,7 @@ with tab1:
 
     with st.form("form_coleta_v13"):
         st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
-        st.caption("🔒 ESTA AVALIAÇÃO É ANÔNIMA E SIGILOSA. OS DADOS SÃO TRATADOS COLETIVAMENTE.")
+        st.caption("🔒 ESTA AVALIAÇÃO É ANÔNIMA E SIGILOSA. OS DADOS SERÃO TRATADOS COLETIVAMENTE.")
         
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
@@ -100,7 +100,7 @@ with tab1:
 
     # RODAPÉ DE DIREITOS AUTORAIS
     st.markdown("---")
-    st.caption("© 2026 HMM Serviços - Engenharia e Perícias. Todos os direitos reservados. É proibida a reprodução total ou parcial deste protocolo sem autorização.")
+    st.caption("© 2026 HMM Serviços - Segurança do Trabalho e Meio Ambiente. Todos os direitos reservados. É proibida a reprodução total ou parcial deste protocolo sem autorização.")
 
 # --- ABA 2: PAINEL DE ANÁLISE ---
 with tab2:
