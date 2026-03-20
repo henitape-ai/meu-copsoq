@@ -9,19 +9,19 @@ st.set_page_config(page_title="HMM Serviços - Gestão Psicossocial", layout="wi
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
-st.title("🚀 Programa de Avaliação de Riscos Psicossociais")
+st.title("Programa de Avaliação de Riscos Psicossociais")
 st.subheader("HMM Serviços - Engenharia de Segurança e Gestão Ocupacional")
 st.markdown("""
-**Responsável Técnico:** Eng. Henrique  
-🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) | 📍 Itapetininga/SP
+**Responsável Técnico:** Eng. Henrique Motta de Miranda  
+🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) |  Itapetininga/SP
 """)
 st.markdown("---")
 
-tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
+tab1, tab2 = st.tabs([" Coleta de Dados (Ficha)", "Painel de Análise e Relatórios"])
 
 # --- ABA 1: COLETA ---
 with tab1:
-    st.subheader("📋 Identificação da Unidade Avaliada")
+    st.subheader("Identificação da Empresa")
     c1, c2, c3 = st.columns([2, 1, 1])
     with c1: emp = st.text_input("Empresa Cliente:", placeholder="Ex: SENAC ou Mercado do Zé")
     with c2: setr = st.text_input("Setor:", placeholder="Ex: Administração")
