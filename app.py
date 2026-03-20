@@ -5,18 +5,21 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão HMM
-st.set_page_config(page_title="HMM Serviços - Perícia 12.0", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Portal de Avaliação", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.title("Avaliação Psicossocial COPSOQ - HMM Serviços")
+# --- CABEÇALHO INSTITUCIONAL ---
+st.title("Avaliação Psicossocial COPSOQ")
+st.subheader("HMM Serviços")
+st.caption("🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
 # 2. Navegação por Abas
-tab1, tab2 = st.tabs(["Coleta de Dados", "Painel de Análise e Laudo"])
+tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Laudo"])
 
 # --- ABA 1: COLETA DE DADOS ---
 with tab1:
-    st.subheader("Identificação da Avaliação")
+    st.subheader("📋 Identificação da Avaliação")
     
     c_id1, c_id2, c_id3 = st.columns([2, 1, 1])
     with c_id1: empresa = st.text_input("Empresa Avaliada:", placeholder="Digite o nome da empresa")
@@ -26,16 +29,15 @@ with tab1:
     st.markdown("---")
     escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-    with st.form("form_coleta_v12"):
+    with st.form("form_coleta_v13"):
         st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
-        st.caption("🔒 Esta avaliação é anônima e sigilosa. Os dados são processados coletivamente para diagnóstico organizacional.")
+        st.caption("🔒 ESTA AVALIAÇÃO É ANÔNIMA E SIGILOSA. OS DADOS SÃO TRATADOS COLETIVAMENTE.")
         
         st.markdown("<br>", unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         
         with col1:
             st.markdown("### 1. DEMANDAS")
-            # index=None faz com que nenhuma opção venha marcada
             p1 = st.radio("O RITMO DE TRABALHO É INTENSO?", list(escala.keys()), index=None)
             st.markdown("<br>", unsafe_allow_html=True)
             
@@ -66,10 +68,9 @@ with tab1:
         submit = st.form_submit_button("FINALIZAR E GRAVAR DIAGNÓSTICO")
 
     if submit:
-        # Validação: Verifica se todos os campos foram preenchidos
         respostas = [p1, p2, p3, p4, p5, p6, p7, p9]
         if None in respostas or not empresa or not setor:
-            st.error("⚠️ Atenção: Preencha todos os campos de identificação e responda todas as perguntas antes de gravar.")
+            st.error("⚠️ Atenção: Preencha todos os campos e responda todas as perguntas.")
         else:
             v_dem = (escala[p1] + escala[p2]) / 2
             v_con = (escala[p3] + escala[p4]) / 2
@@ -97,10 +98,14 @@ with tab1:
             except Exception as e:
                 st.error(f"Erro na gravação: {e}")
 
+    # RODAPÉ DE DIREITOS AUTORAIS
+    st.markdown("---")
+    st.caption("© 2026 HMM Serviços - Engenharia e Perícias. Todos os direitos reservados. É proibida a reprodução total ou parcial deste protocolo sem autorização.")
+
 # --- ABA 2: PAINEL DE ANÁLISE ---
 with tab2:
-    st.subheader("Painel de Análise")
-    senha = st.text_input("Senha de Acesso:", type="password", key="login_v12")
+    st.subheader("🔐 Painel de Análise")
+    senha = st.text_input("Senha de Acesso:", type="password", key="login_v13")
 
     if senha == "HMM2024":
         try:
@@ -146,3 +151,7 @@ with tab2:
                 st.warning("BANCO DE DADOS VAZIO.")
         except Exception as e:
             st.error(f"Erro: {e}")
+    
+    # RODAPÉ DE DIREITOS AUTORAIS NA ABA 2 TAMBÉM
+    st.markdown("---")
+    st.caption("© 2026 HMM Serviços - Engenharia e Perícias. Todos os direitos reservados.")
