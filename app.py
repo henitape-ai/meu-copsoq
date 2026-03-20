@@ -59,8 +59,35 @@ with tab1:
         elif v_dem > 60 or v_sau > 60: classif = "Risco Moderado"
 
         try:
+            # CORREÇÃO DA LINHA 62 (DICIONÁRIO FECHADO CORRETAMENTE)
             nova_linha = pd.DataFrame([{
                 "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
                 "Empresa": empresa, "Setor": setor, "Funcao": funcao,
                 "Demanda": v_dem, "Controle": v_con, "Suporte": v_sup, 
-                "Saude": v_sau, "Inseguranca": v_ins, "Significado":
+                "Saude": v_sau, "Inseguranca": v_ins, "Significado": 50,
+                "Classificacao_Risco": classif, 
+                "Parecer_Tecnico": f"Avaliação técnica setorial em {setor}", 
+                "Link_Grafico": ""
+            }])
+            df_b = conn.read(worksheet="Página1", ttl=0)
+            conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
+            st.success(f"✅ Avaliação de {funcao} registrada com sucesso!")
+            st.balloons()
+        except Exception as e:
+            if "200" in str(e): st.success("✅ Diagnóstico enviado com sucesso!")
+            else: st.error(f"Erro na Gravação: {e}")
+
+# --- ABA 2: PAINEL DE ANÁLISE E GERADOR DE LAUDO ---
+with tab2:
+    st.subheader("🔐 Painel de Análise e Laudo Técnico")
+    senha = st.text_input("Senha de Acesso:", type="password", key="login_v10")
+
+    if senha == "HMM2024":
+        try:
+            df = conn.read(worksheet="Página1", ttl=0)
+            if not df.empty:
+                c_f1, c_f2 = st.columns(2)
+                with c_f1:
+                    lista_emp = sorted(df['Empresa'].unique())
+                    emp_sel = st.selectbox("1. Selecione a Empresa:", lista_emp)
+                    df_emp = df[df['Emp
