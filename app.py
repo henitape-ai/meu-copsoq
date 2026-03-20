@@ -8,15 +8,15 @@ from datetime import datetime
 st.set_page_config(page_title="HMM Serviços - Perícia 11.0", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-st.title("📊 Protocolo COPSOQ III - HMM Serviços")
+st.title("Avaliação Psicossocial COPSOQ - HMM Serviços")
 st.markdown("---")
 
 # 2. Navegação por Abas
-tab1, tab2 = st.tabs(["📝 Coleta de Dados", "🔐 Painel de Análise e Laudo"])
+tab1, tab2 = st.tabs(["Coleta de Dados", "Painel de Análise e Laudo"])
 
 # --- ABA 1: COLETA DE DADOS ---
 with tab1:
-    st.subheader("📋 Identificação da Avaliação")
+    st.subheader("Identificação da Avaliação")
     
     c_id1, c_id2, c_id3 = st.columns([2, 1, 1])
     with c_id1: empresa = st.text_input("Empresa Avaliada:", "Nome da Empresa")
@@ -27,32 +27,32 @@ with tab1:
     escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
     with st.form("form_coleta_v11"):
-        st.markdown("#### 📝 QUESTIONÁRIO TÉCNICO (COPSOQ III)")
+        st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ III)")
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("### 📈 DEMANDAS")
+            st.markdown("### DEMANDAS")
             p1 = st.radio("O RITMO DE TRABALHO É INTENSO?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p2 = st.radio("AS TAREFAS SÃO EMOCIONALMENTE DESGASTANTES?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
-            st.markdown("### 🛠️ CONTROLE")
+            st.markdown("### CONTROLE")
             p3 = st.radio("VOCÊ TEM INFLUÊNCIA SOBRE AS DECISÕES NO TRABALHO?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p4 = st.radio("O TRABALHO PERMITE APRENDER NOVAS HABILIDADES?", list(escala.keys()), index=2)
             
         with col2:
-            st.markdown("### 🤝 SUPORTE SOCIAL")
+            st.markdown("### SUPORTE SOCIAL")
             p5 = st.radio("RECEBE APOIO DA CHEFIA QUANDO PRECISA?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
             p6 = st.radio("HÁ COLABORAÇÃO ENTRE OS COLEGAS?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
-            st.markdown("### ⚠️ SAÚDE E INSEGURANÇA")
+            st.markdown("### SAÚDE E INSEGURANÇA")
             p7 = st.radio("SENTE-SE TENSO OU ESTRESSADO ULTIMAMENTE?", list(escala.keys()), index=2)
             st.markdown("<br>", unsafe_allow_html=True) # Espaço
             
@@ -83,15 +83,15 @@ with tab1:
             }])
             df_b = conn.read(worksheet="Página1", ttl=0)
             conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-            st.success(f"✅ DADOS DE {funcao.upper()} GRAVADOS!")
+            st.success(f"DADOS DE {funcao.upper()} GRAVADOS!")
             st.balloons()
         except Exception as e:
-            if "200" in str(e): st.success("✅ DIAGNÓSTICO ENVIADO!")
+            if "200" in str(e): st.success("DIAGNÓSTICO ENVIADO!")
             else: st.error(f"Erro: {e}")
 
 # --- ABA 2: PAINEL DE ANÁLISE E LAUDO ---
 with tab2:
-    st.subheader("🔐 Painel de Análise e Laudo Técnico")
+    st.subheader("Painel de Análise")
     senha = st.text_input("Senha de Acesso:", type="password", key="login_v11")
 
     if senha == "HMM2024":
