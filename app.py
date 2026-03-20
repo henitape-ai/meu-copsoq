@@ -9,7 +9,7 @@ st.set_page_config(page_title="HMM Serviços - Portal de Avaliação", layout="w
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO INSTITUCIONAL ---
-st.title("Avaliação Psicossocial - COPSOQ")
+st.title("Avaliação Psicossocial - Riscos Psicossociais (COPSOQ - Copenhagen Psychosocial Questionnaire)")
 st.subheader("HMM Serviços")
 st.caption("🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
