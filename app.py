@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. Configurações de Engenharia e Conexão HMM
-st.set_page_config(page_title="HMM Serviços - Perícia 11.0", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Perícia 11.1", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 st.title("Avaliação Psicossocial COPSOQ - HMM Serviços")
@@ -28,7 +28,7 @@ with tab1:
 
     with st.form("form_coleta_v11"):
         st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
-        # Texto menor e discreto abaixo do título
+        # Texto de anonimato menor que o título
         st.caption("🔒 Esta avaliação é anônima e sigilosa. Os dados são processados coletivamente para diagnóstico organizacional.")
         
         st.markdown("<br>", unsafe_allow_html=True)
@@ -126,4 +126,8 @@ with tab2:
                 with col_metrics:
                     st.write("**MÉDIAS DO SETOR:**")
                     st.dataframe(m)
-                    st.metric("AMOSTRA (N
+                    st.metric("AMOSTRA (N)", len(df_set))
+
+                # Lógica de Relatório
+                status = "ESTÁVEL"
+                if m['Demanda'] > 60 and m['Controle'] < 40: status
