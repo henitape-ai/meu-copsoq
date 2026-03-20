@@ -68,7 +68,7 @@ with tab1:
         with col3:
             p9 = st.radio("VOCÊ FOI EXPOSTO A SITUAÇÕES DE HUMILHAÇÃO OU ASSÉDIO MORAL?", list(escala.keys()), index=None)
         with col4:
-            p10 = st.radio("VOCÊ FOI EXPOSTO A SITUAÇÕES DE ASSÉDIO SEXUAL (CONDUTAS INADEQUADAS OU CONCURSOS INDESEJADOS)?", list(escala.keys()), index=None)
+            p10 = st.radio("VOCÊ FOI EXPOSTO A SITUAÇÕES DE ASSÉDIO SEXUAL (CONDUTAS INADEQUADAS OU INDESEJADAS)?", list(escala.keys()), index=None)
         
         st.markdown("<br>", unsafe_allow_html=True)
         submit = st.form_submit_button("FINALIZAR E GRAVAR DIAGNÓSTICO")
