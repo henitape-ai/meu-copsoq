@@ -27,7 +27,7 @@ with tab1:
     escala = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
     with st.form("form_coleta_v11"):
-        st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ III)")
+        st.markdown("#### QUESTIONÁRIO TÉCNICO (COPSOQ)")
         col1, col2 = st.columns(2)
         
         with col1:
