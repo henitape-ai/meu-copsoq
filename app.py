@@ -14,9 +14,9 @@ st.subheader("HMM Serviços - Engenharia e Segurança do Trabalho")
 st.caption("🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "🔐 Painel de Gestão e Relatórios"])
+tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
 
-# --- ABA 1: COLETA ---
+# --- ABA 1: COLETA (ALINHADA COM A FICHA DE 5 ITENS) ---
 with tab1:
     st.subheader("📋 Identificação da Unidade")
     c1, c2, c3 = st.columns([2, 1, 1])
@@ -26,7 +26,7 @@ with tab1:
     
     escala_freq = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
 
-    with st.form("form_v22_2"):
+    with st.form("form_v22_3"):
         st.markdown("#### QUESTIONÁRIO DE DIAGNÓSTICO ORGANIZACIONAL")
         col1, col2 = st.columns(2)
         with col1:
@@ -35,17 +35,17 @@ with tab1:
             p1_2 = st.radio("1.2 O seu trabalho é emocionalmente desgastante?", list(escala_freq.keys()), index=None)
             p1_3 = st.radio("1.3 O volume de trabalho é excessivo para o tempo?", list(escala_freq.keys()), index=None)
             p1_4 = st.radio("1.4 Você lida com prazos muito apertados?", list(escala_freq.keys()), index=None)
-            p1_5 = st.radio("1.5 O trabalho exige esforço intenso (físico/mental)?", list(escala_freq.keys()), index=None)
+            p1_5 = st.radio("1.5 O trabalho exige esforço intenso?", list(escala_freq.keys()), index=None)
             st.markdown("### 2. INFLUÊNCIA (CONTROLE)")
             p2_1 = st.radio("2.1 Tem influência sobre as decisões no trabalho?", list(escala_freq.keys()), index=None)
             p2_2 = st.radio("2.2 Tem oportunidade de aprender coisas novas?", list(escala_freq.keys()), index=None)
         with col2:
             st.markdown("### 3. SUPORTE SOCIAL")
-            p3_1 = st.radio("3.1 O superior imediato apoia você quando precisa?", list(escala_freq.keys()), index=None)
-            p3_2 = st.radio("3.2 Há um bom espírito de cooperação entre colegas?", list(escala_freq.keys()), index=None)
+            p3_1 = st.radio("3.1 O superior imediato apoia você?", list(escala_freq.keys()), index=None)
+            p3_2 = st.radio("3.2 Há cooperação entre os colegas?", list(escala_freq.keys()), index=None)
             st.markdown("### 4. BEM-ESTAR")
-            p4_1 = st.radio("4.1 Sente-se tenso ou estressado ultimamente?", list(escala_freq.keys()), index=None)
-            p4_2 = st.radio("4.2 Preocupado com a estabilidade no emprego?", list(escala_freq.keys()), index=None)
+            p4_1 = st.radio("4.1 Sente-se tenso ou estressado?", list(escala_freq.keys()), index=None)
+            p4_2 = st.radio("4.2 Preocupado com estabilidade?", list(escala_freq.keys()), index=None)
             st.markdown("### 5. AMBIENTE ÉTICO")
             p5_1 = st.radio("5.1 Exposto a humilhação ou assédio moral?", list(escala_freq.keys()), index=None)
             p5_2 = st.radio("5.2 Exposto a assédio sexual?", list(escala_freq.keys()), index=None)
@@ -74,35 +74,53 @@ with tab1:
                     st.balloons()
                 except Exception as e: st.error(f"Erro: {e}")
 
-# --- ABA 2: GESTÃO ---
+# --- ABA 2: ANÁLISE E GRÁFICOS ---
 with tab2:
-    st.subheader("🔐 Área do Consultor - HMM")
-    senha = st.text_input("Senha:", type="password", key="login_v22_2")
+    st.subheader("🔐 Painel de Gestão HMM")
+    senha = st.text_input("Senha:", type="password", key="login_v22_3")
     if senha == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
             emp_sel = st.selectbox("Empresa:", sorted(df['Empresa'].unique()), index=None)
             if emp_sel:
                 setores = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
-                set_sel = st.multiselect("Setores:", setores)
+                set_sel = st.multiselect("Filtrar por Setor (Vazio = Geral):", setores)
+                
+                # Filtragem dos dados
+                df_filtrado = df[df['Empresa'] == emp_sel]
+                if set_sel:
+                    df_filtrado = df_filtrado[df_filtrado['Setor'].isin(set_sel)]
+                
+                # Cálculo de Médias
+                cols = ['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca', 'Assedio_Moral', 'Assedio_Sexual']
+                medias = df_filtrado[cols].mean()
+                
+                # Exibição de Métricas
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Amostra (N)", len(df_filtrado))
+                c2.metric("Índice de Estresse", f"{medias['Saude']:.1f}")
+                c3.metric("Risco de Assédio", f"{max(medias['Assedio_Moral'], medias['Assedio_Sexual']):.1f}")
+
+                # Gráfico de Radar (Plotly)
+                df_radar = pd.DataFrame(dict(r=medias.values, theta=medias.index))
+                fig = px.line_polar(df_radar, r='r', theta='theta', line_close=True, range_r=[0,100])
+                fig.update_traces(fill='toself', line_color='red')
+                st.plotly_chart(fig, use_container_width=True)
+
+                # Tabela de Valores Detalhada
+                st.markdown("### 📊 Tabela de Médias (0-100)")
+                st.dataframe(medias.to_frame(name="Valor Médio").T.style.format("{:.1f}"))
+
+                # Gerador de Relatório (Word)
                 st.markdown("---")
-                txt_p = "Diagnóstico: [ALTA TENSÃO]. Recomendações: NR-17 e Treinamentos."
-                conclusao = st.text_area("Conclusão:", value=txt_p, height=150)
-                if st.button("🚀 GERAR RELATÓRIO"):
-                    setores_f = set_sel if set_sel else setores
+                txt_p = "Diagnóstico aponta perfil de [ALTA TENSÃO]. Recomendações: NR-17 e Compliance."
+                conclusao = st.text_area("Conclusão para o Relatório:", value=txt_p, height=150)
+                
+                if st.button("🚀 GERAR TEXTO PARA O WORD"):
                     minuta = f"RELATÓRIO TÉCNICO - {emp_sel.upper()}\nDATA: {datetime.now().strftime('%d/%m/%Y')}\n"
-                    minuta += "="*40 + "\n\n"
-                    cols_calc = ['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca', 'Assedio_Moral', 'Assedio_Sexual']
-                    for s in setores_f:
-                        df_s = df[(df['Empresa'] == emp_sel) & (df['Setor'] == s)]
-                        m = df_s[cols_calc].mean()
-                        minuta += f"SETOR: {s.upper()}\nDemanda: {m['Demanda']:.1f} | Controle: {m['Controle']:.1f}\n"
-                        minuta += f"Assédio M/S: {m['Assedio_Moral']:.1f}/{m['Assedio_Sexual']:.1f}\n"
-                        minuta += "-"*20 + "\n\n"
-                    df_g = df[df['Empresa'] == emp_sel]
-                    mg = df_g[cols_calc].mean()
-                    minuta += "="*40 + f"\nGERAL: {len(df_g)} avaliados\n"
-                    minuta += f"Média Geral Demanda: {mg['Demanda']:.1f}\n"
+                    minuta += "="*40 + f"\nGERAL: {len(df_filtrado)} avaliados\n"
+                    minuta += f"Médias:\nDemanda {medias['Demanda']:.1f} | Controle {medias['Controle']:.1f}\n"
+                    minuta += f"Suporte {medias['Suporte']:.1f} | Estresse {medias['Saude']:.1f}\n"
                     minuta += "="*40 + f"\n\nCONCLUSÃO:\n{conclusao}\n\nEng. Henrique - HMM"
-                    st.text_area("COPIE:", minuta, height=400)
+                    st.text_area("COPIE E COLE NO WORD:", minuta, height=300)
         else: st.warning("Sem dados.")
