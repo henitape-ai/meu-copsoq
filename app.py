@@ -13,7 +13,7 @@ st.title("Avaliação de Riscos Psicossociais - COPSOQ III")
 st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho e Meio Ambiente")
 st.markdown("""
 **Responsável Técnico:** Eng. Henrique Motta de Miranda
-🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) | Itapetininga/ SP
+🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)
 """)
 st.markdown("---")
 
