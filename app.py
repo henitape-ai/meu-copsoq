@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS E CONEXÃO
-st.set_page_config(page_title="HMM - Gestão V23.7", layout="wide")
+st.set_page_config(page_title="HMM - Gestão V23.8", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
@@ -26,13 +26,13 @@ esc_n9 = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, 
 # --- ABA 1: FORMULÁRIO ---
 with tab1:
     st.info("⚠️ **IMPORTANTE:** Esta avaliação é **ANÔNIMA**. Responda com sinceridade.")
-    with st.form("form_v23_7", clear_on_submit=True):
+    with st.form("form_v23_8", clear_on_submit=True):
         st.markdown("### 📋 Identificação")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
         with c2: setr = st.text_input("Setor:")
         with c3: func = st.text_input("Função (Opcional):")
-        with c4: idade_val = st.number_input("Idade:", min_value=14, max_value=100, value=30) # Campo Idade Reinserido
+        with c4: idade_val = st.number_input("Idade:", min_value=14, max_value=100, value=30)
 
         col_a, col_b = st.columns(2)
         with col_a:
@@ -114,4 +114,33 @@ with tab1:
 
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
-    st.subheader("🔐 Painel do Consultor HMM
+    st.subheader("🔐 Painel do Consultor HMM")
+    acesso = st.text_input("Senha de Acesso:", type="password", key="master_pwd_v23_8")
+    
+    if acesso == "HMM2024":
+        df = conn.read(worksheet="Página1", ttl=0)
+        if not df.empty:
+            df['Empresa'] = df['Empresa'].astype(str).str.strip()
+            df['Setor'] = df['Setor'].astype(str).str.strip()
+            
+            st.markdown("### 🔍 Filtros de Análise")
+            c1, c2 = st.columns(2)
+            with c1:
+                lista_emp = sorted(df['Empresa'].unique())
+                emp_sel = st.selectbox("Selecione o Cliente:", lista_emp, index=None)
+            if emp_sel:
+                with c2:
+                    lista_set = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
+                    set_sel = st.multiselect("Setores Disponíveis:", lista_set)
+                
+                df_f = df[df['Empresa'] == emp_sel]
+                if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
+                
+                m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
+                
+                # Gráfico de Radar
+                fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
+                fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
+                st.plotly_chart(fig, use_container_width=True)
+                st.dataframe(m.to_frame(name="Média").T.style.format("{:.1f}"))
+        else: st.warning("Planilha sem registros.")
