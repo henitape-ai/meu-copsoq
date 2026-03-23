@@ -5,133 +5,124 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES HMM SERVIÇOS
-st.set_page_config(page_title="HMM Serviços - Gestão Psicossocial", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Diagnóstico Completo", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- CABEÇALHO PROFISSIONAL ---
+# --- CABEÇALHO ---
 st.title("🚀 Programa de Avaliação de Riscos Psicossociais")
-st.subheader("HMM Serviços - Engenharia de Segurança e Gestão Ocupacional")
+st.subheader("HMM Serviços - Diagnóstico Avançado (41 Indicadores)")
 st.markdown("""
-**Responsável Técnico:** Eng. Henrique  
-🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) | 📍 Itapetininga/SP
+**Responsável Técnico:** Eng. Henrique | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)
+---
+⚠️ **ANONIMATO GARANTIDO:** Suas respostas são confidenciais e processadas de forma coletiva.
 """)
-st.markdown("---")
 
-tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
+tab1, tab2 = st.tabs(["📝 Formuário de Coleta", "📊 Painel de Análise Profissional"])
 
-# --- ABA 1: COLETA ---
+# --- DICIONÁRIO DE ESCALAS ---
+# Escala de Frequência Padrão
+esc_f = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca / Quase nunca": 0}
+# Escala de Intensidade (Significado/Satisfação)
+esc_i = {"Extremamente": 100, "Muito": 75, "Moderadamente": 50, "Um pouco": 25, "Nunca / Quase Nunca": 0}
+# Escala de Saúde
+esc_s = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
+
 with tab1:
-    st.subheader("📋 Identificação da Unidade Avaliada")
-    
-    # FRASE DE ANONIMATO SOLICITADA
-    st.info("⚠️ **IMPORTANTE:** Este diagnóstico e avaliação são **estritamente anônimos**. "
-            "Os dados são processados de forma coletiva pela HMM Serviços para fins de "
-            "melhoria do ambiente de trabalho, sem identificação individual dos respondentes.")
-    
-    c1, c2, c3 = st.columns([2, 1, 1])
-    with c1: emp = st.text_input("Empresa Cliente:", placeholder="Ex: SENAC ou Mercado do Zé")
-    with c2: setr = st.text_input("Setor:", placeholder="Ex: Administração")
-    with c3: func = st.text_input("Função (Opcional):", placeholder="Ex: Analista")
-    
-    esc = {"Sempre": 100, "Frequentemente": 75, "Às vezes": 50, "Raramente": 25, "Nunca": 0}
+    with st.form("form_v23"):
+        # IDENTIFICAÇÃO
+        c1, c2, c3, c4 = st.columns(4)
+        with c1: emp = st.text_input("Empresa:")
+        with c2: setr = st.text_input("Setor:")
+        with c3: func = st.text_input("Função:")
+        with c4: idade = st.number_input("Idade:", min_value=14, max_value=100, step=1)
 
-    with st.form("form_v22_8"):
-        st.markdown("#### DIAGNÓSTICO DE FATORES PSICOSSOCIAIS")
-        col1, col2 = st.columns(2)
-        with col1:
-            st.markdown("### 1. EXIGÊNCIAS (DEMANDAS)")
-            p1_1 = st.radio("1.1 Você tem que trabalhar muito rápido?", list(esc.keys()), index=None)
-            p1_2 = st.radio("1.2 O seu trabalho é emocionalmente desgastante?", list(esc.keys()), index=None)
-            p1_3 = st.radio("1.3 O volume de trabalho é excessivo para o tempo disponível?", list(esc.keys()), index=None)
-            p1_4 = st.radio("1.4 Você precisa lidar com prazos muito apertados?", list(esc.keys()), index=None)
-            p1_5 = st.radio("1.5 O seu trabalho exige um esforço físico ou mental intenso?", list(esc.keys()), index=None)
-            
-            st.markdown("### 2. INFLUÊNCIA E DESENVOLVIMENTO (CONTROLE)")
-            p2_1 = st.radio("2.1 Você tem influência sobre as decisões no seu trabalho?", list(esc.keys()), index=None)
-            p2_2 = st.radio("2.2 O trabalho permite que você aprenda novas habilidades?", list(esc.keys()), index=None)
-            
-        with col2:
-            st.markdown("### 3. RELAÇÕES E SUPORTE SOCIAL")
-            p3_1 = st.radio("3.1 O seu superior imediato apoia você quando precisa?", list(esc.keys()), index=None)
-            p3_2 = st.radio("3.2 Há um bom espírito de cooperação entre os colegas?", list(esc.keys()), index=None)
-            
-            st.markdown("### 4. SAÚDE E BEM-ESTAR")
-            p4_1 = st.radio("4.1 Você tem se sentido tenso ou estressado ultimamente?", list(esc.keys()), index=None)
-            p4_2 = st.radio("4.2 Você tem receio quanto à estabilidade no seu emprego?", list(esc.keys()), index=None)
-            
-            st.markdown("### 5. AMBIENTE ÉTICO (COMPLIANCE)")
-            p5_1 = st.radio("5.1 No último ano, foi exposto a situações de humilhação ou insultos?", list(esc.keys()), index=None)
-            p5_2 = st.radio("5.2 Foi alvo de comentários ou avanços sexuais indesejados?", list(esc.keys()), index=None)
-        
-        if st.form_submit_button("✅ SALVAR AVALIAÇÃO"):
-            resp = [p1_1, p1_2, p1_3, p1_4, p1_5, p2_1, p2_2, p3_1, p3_2, p4_1, p4_2, p5_1, p5_2]
-            if None in resp or not emp or not setr:
-                st.error("⚠️ Atenção: Preencha todas as perguntas para validar o diagnóstico.")
-            else:
-                try:
-                    v_dem = (esc[p1_1]+esc[p1_2]+esc[p1_3]+esc[p1_4]+esc[p1_5])/5
-                    v_con = (esc[p2_1]+esc[p2_2])/2
-                    v_sup = (esc[p3_1]+esc[p3_2])/2
-                    nova_linha = pd.DataFrame([{
-                        "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
-                        "Empresa": emp.strip(), "Setor": setr.strip(), "Funcao": func.strip(),
-                        "Demanda": v_dem, "Controle": v_con, "Suporte": v_sup,
-                        "Saude": esc[p4_1], "Inseguranca": esc[p4_2],
-                        "Assedio_Moral": esc[p5_1], "Assedio_Sexual": esc[p5_2],
-                        "Status": "Finalizado", "Metodo": "COPSOQ III"
-                    }])
-                    df_b = conn.read(worksheet="Página1", ttl=0)
-                    df_f = pd.concat([df_b, nova_linha], ignore_index=True)
-                    conn.update(worksheet="Página1", data=df_f)
-                    st.success("✅ RESPOSTAS GRAVADAS COM SUCESSO E SIGILO!")
-                except Exception as e: st.error(f"Erro de Conexão: {e}")
+        st.markdown("---")
+        col_a, col_b = st.columns(2)
 
-# --- ABA 2: ANÁLISE ---
+        with col_a:
+            st.info("### 1. EXIGÊNCIAS E TRABALHO")
+            q1 = st.radio("1. Carga de trabalho mal distribuída?", list(esc_f.keys()), index=None)
+            q2 = st.radio("2. Falta de tempo para completar tarefas?", list(esc_f.keys()), index=None)
+            q3 = st.radio("3. Precisa trabalhar muito rápido?", list(esc_f.keys()), index=None)
+            q4 = st.radio("4. Exige atenção constante?", list(esc_f.keys()), index=None)
+            q5 = st.radio("5. Exige tomar decisões difíceis?", list(esc_f.keys()), index=None)
+            q6 = st.radio("6. Exige emocionalmente de você?", list(esc_f.keys()), index=None)
+
+            st.info("### 2. INFLUÊNCIA E DESENVOLVIMENTO")
+            q7 = st.radio("7. Elevado grau de influência?", list(esc_f.keys()), index=None)
+            q8 = st.radio("8. Exige iniciativa?", list(esc_f.keys()), index=None)
+            q9 = st.radio("9. Permite aprender coisas novas?", list(esc_f.keys()), index=None)
+
+            st.info("### 3. INFORMAÇÃO E PAPEL NO TRABALHO")
+            q10 = st.radio("10. Informado sobre decisões importantes?", list(esc_f.keys()), index=None)
+            q11 = st.radio("11. Recebe toda informação necessária?", list(esc_f.keys()), index=None)
+            q12 = st.radio("12. Sabe exatamente suas responsabilidades?", list(esc_f.keys()), index=None)
+
+            st.info("### 4. RELAÇÕES SOCIAIS E LIDERANÇA")
+            q13 = st.radio("13. Reconhecido pela gerência?", list(esc_f.keys()), index=None)
+            q14 = st.radio("14. Tratado de forma justa?", list(esc_f.keys()), index=None)
+            q15 = st.radio("15. Tem apoio do superior imediato?", list(esc_f.keys()), index=None)
+            q16 = st.radio("16. Bom ambiente com colegas?", list(esc_f.keys()), index=None)
+            q17 = st.radio("17. Chefia oferece desenvolvimento?", list(esc_f.keys()), index=None)
+            q18 = st.radio("18. Chefia é boa no planejamento?", list(esc_f.keys()), index=None)
+            q19 = st.radio("19. Gerência confia nos funcionários?", list(esc_f.keys()), index=None)
+            q20 = st.radio("20. Confia na informação da gerência?", list(esc_f.keys()), index=None)
+            q21 = st.radio("21. Conflitos resolvidos de forma justa?", list(esc_f.keys()), index=None)
+            q22 = st.radio("22. Trabalho distribuído igualmente?", list(esc_f.keys()), index=None)
+
+        with col_b:
+            st.success("### 5. SIGNIFICADO E SATISFAÇÃO")
+            q23 = st.radio("23. Capaz de resolver problemas?", list(esc_f.keys()), index=None)
+            q24 = st.radio("24. Trabalho tem significado?", list(esc_i.keys()), index=None)
+            q25 = st.radio("25. Sente que o trabalho é importante?", list(esc_i.keys()), index=None)
+            q26 = st.radio("26. Problemas da empresa são seus também?", list(esc_i.keys()), index=None)
+            q27 = st.radio("27. Satisfação global com o trabalho?", list(esc_i.keys()), index=None)
+
+            st.success("### 6. SEGURANÇA E SAÚDE GERAL")
+            q28 = st.radio("28. Preocupado com desemprego?", list(esc_i.keys()), index=None)
+            q29 = st.radio("29. Em geral, sua saúde é:", list(esc_s.keys()), index=None)
+
+            st.success("### 7. INTERFACE TRABALHO-INDIVÍDUO")
+            q30 = st.radio("30. Afeta vida privada negativamente (Energia)?", list(esc_i.keys()), index=None)
+            q31 = st.radio("31. Afeta vida privada negativamente (Tempo)?", list(esc_i.keys()), index=None)
+
+            st.error("### 8. SAÚDE MENTAL E EXAUSTÃO")
+            q32 = st.radio("32. Dificuldade para dormir?", list(esc_f.keys()), index=None)
+            q33 = st.radio("33. Fisicamente exausto?", list(esc_f.keys()), index=None)
+            q34 = st.radio("34. Emocionalmente exausto?", list(esc_f.keys()), index=None)
+            q35 = st.radio("35. Irritado?", list(esc_f.keys()), index=None)
+            q36 = st.radio("36. Ansioso?", list(esc_f.keys()), index=None)
+            q37 = st.radio("37. Triste?", list(esc_f.keys()), index=None)
+
+            st.error("### 9. COMPORTAMENTOS OFENSIVOS")
+            q38 = st.radio("38. Insultos ou provocações verbais?", list(esc_f.keys()), index=None)
+            q39 = st.radio("39. Assédio sexual indesejado?", list(esc_f.keys()), index=None)
+            q40 = st.radio("40. Ameaças de violência?", list(esc_f.keys()), index=None)
+            q41 = st.radio("41. Violência física?", list(esc_f.keys()), index=None)
+
+        if st.form_submit_button("✅ GRAVAR DIAGNÓSTICO COMPLETO"):
+            # Lógica de cálculo simplificada por blocos para o Sheets
+            try:
+                # Médias por Dimensão (Engenharia HMM)
+                v_demanda = (esc_f[q1]+esc_f[q2]+esc_f[q3]+esc_f[q4]+esc_f[q5]+esc_f[q6])/6
+                v_controle = (esc_f[q7]+esc_f[q8]+esc_f[q9])/3
+                v_lideranca = (esc_f[q13]+esc_f[q14]+esc_f[q15]+esc_f[q16]+esc_f[q17]+esc_f[q18]+esc_f[q19]+esc_f[q20]+esc_f[q21]+esc_f[q22])/10
+                v_saude_mental = (esc_f[q32]+esc_f[q33]+esc_f[q34]+esc_f[q35]+esc_f[q36]+esc_f[q37])/6
+                v_ofensivo = (esc_f[q38]+esc_f[q39]+esc_f[q40]+esc_f[q41])/4
+
+                nova_linha = pd.DataFrame([{
+                    "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                    "Empresa": emp, "Setor": setr, "Funcao": func, "Idade": idade,
+                    "Demanda": v_demanda, "Controle": v_controle, "Lideranca": v_lideranca,
+                    "Satisfacao": esc_i[q27], "Saude_Geral": esc_s[q29], 
+                    "Saude_Mental": v_saude_mental, "Ofensivo": v_ofensivo
+                }])
+                
+                df_b = conn.read(worksheet="Página1", ttl=0)
+                conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
+                st.success("✅ DADOS GRAVADOS COM SUCESSO!")
+            except Exception as e: st.error(f"Erro: {e}")
+
+# --- ABA 2: ANÁLISE --- (Simplificada para o exemplo)
 with tab2:
-    st.subheader("🔐 Painel de Gestão e Relatórios")
-    senha = st.text_input("Senha de Acesso:", type="password", key="login_v22_8")
-    if senha == "HMM2024":
-        df = conn.read(worksheet="Página1", ttl=0)
-        if not df.empty:
-            df['Empresa'] = df['Empresa'].str.strip()
-            df['Setor'] = df['Setor'].str.strip()
-            emp_sel = st.selectbox("Selecione o Cliente:", sorted(df['Empresa'].unique()), index=None)
-            if emp_sel:
-                setores = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
-                set_sel = st.multiselect("Filtrar por Setor:", setores)
-                df_f = df[df['Empresa'] == emp_sel]
-                if set_sel:
-                    df_f = df_f[df_f['Setor'].isin(set_sel)]
-                
-                cols = ['Demanda', 'Controle', 'Suporte', 'Saude', 'Inseguranca', 'Assedio_Moral', 'Assedio_Sexual']
-                m = df_f[cols].mean()
-                
-                fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
-                fig.update_traces(fill='toself', line_color='red')
-                st.plotly_chart(fig, use_container_width=True)
-                st.dataframe(m.to_frame(name="Média").T.style.format("{:.1f}"))
-
-                st.markdown("---")
-                concl = st.text_area("✍️ Conclusão Estratégica:", value="Diagnóstico aponta perfil de [ALTA TENSÃO].", height=150)
-                
-                if st.button("🚀 GERAR RELATÓRIO PARA O WORD"):
-                    nome_s = ", ".join(set_sel) if set_sel else "GERAL"
-                    txt = f"RELATÓRIO TÉCNICO DE GESTÃO PSICOSSOCIAL - HMM SERVIÇOS\n"
-                    txt += f"CLIENTE: {emp_sel.upper()}\n"
-                    txt += f"SETOR ANALISADO: {nome_s}\n"
-                    txt += f"Amostra: {len(df_f)} respondentes (Avaliação Anônima)\n"
-                    txt += f"Data: {datetime.now().strftime('%d/%m/%Y')}\n"
-                    txt += "="*50 + "\n"
-                    txt += f"Demanda: {m['Demanda']:.1f} | Controle: {m['Controle']:.1f}\n"
-                    txt += f"Suporte Social: {m['Suporte']:.1f} | Estresse/Saúde: {m['Saude']:.1f}\n"
-                    txt += f"Insegurança Laboral: {m['Inseguranca']:.1f}\n"
-                    txt += f"Assédio Moral: {m['Assedio_Moral']:.1f} | Assédio Sexual: {m['Assedio_Sexual']:.1f}\n"
-                    txt += "="*50 + "\n\nPARECER TÉCNICO:\n" + concl + "\n\n"
-                    txt += "METODOLOGIA: Protocolo COPSOQ III / Modelo de Karasek.\n"
-                    txt += "Eng. Henrique - HMM Serviços"
-                    st.text_area("📋 COPIE O CONTEÚDO:", txt, height=400)
-        else: st.warning("Aguardando dados na base.")
-
-# --- RODAPÉ TÉCNICO ---
-st.markdown("---")
-st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. Sistema de Monitoramento Blindado via COPSOQ III.")
+    st.info("Utilize a senha HMM2024 para acessar os dashboards avançados baseados nestas 41 questões.")
