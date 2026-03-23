@@ -5,27 +5,28 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES HMM SERVIÇOS
-st.set_page_config(page_title="HMM Serviços - Avaliação Psicossocial", layout="wide")
+st.set_page_config(page_title="HMM Serviços - Gestão Psicossocial", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
-st.title("Avaliação de Riscos Psicossociais - COPSOQ III")
-st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho e Meio Ambiente")
+st.title("🚀 Programa de Avaliação de Riscos Psicossociais")
+st.subheader("HMM Serviços - Engenharia de Segurança e Gestão Ocupacional")
 st.markdown("""
-**Responsável Técnico:** Eng. Henrique Motta de Miranda
-🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)
+**Responsável Técnico:** Eng. Henrique  
+🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br) | 📍 Itapetininga/SP
 """)
 st.markdown("---")
 
-tab1, tab2 = st.tabs(["Coleta de Dados (Ficha)", "Painel de Análise e Relatórios"])
+tab1, tab2 = st.tabs(["📝 Coleta de Dados (Ficha)", "📊 Painel de Análise e Relatórios"])
 
 # --- ABA 1: COLETA ---
 with tab1:
-    st.subheader("Identificação da Unidade Avaliada")
+    st.subheader("📋 Identificação da Unidade Avaliada")
     
     # FRASE DE ANONIMATO SOLICITADA
-    st.info("**IMPORTANTE:** Este diagnóstico e avaliação são **estritamente anônimos**. "
-            "Os dados serão processados de forma coletiva, sem identificação individual dos respondentes.")
+    st.info("⚠️ **IMPORTANTE:** Este diagnóstico e avaliação são **estritamente anônimos**. "
+            "Os dados são processados de forma coletiva pela HMM Serviços para fins de "
+            "melhoria do ambiente de trabalho, sem identificação individual dos respondentes.")
     
     c1, c2, c3 = st.columns([2, 1, 1])
     with c1: emp = st.text_input("Empresa Cliente:", placeholder="Ex: SENAC ou Mercado do Zé")
@@ -59,7 +60,7 @@ with tab1:
             p4_2 = st.radio("4.2 Você tem receio quanto à estabilidade no seu emprego?", list(esc.keys()), index=None)
             
             st.markdown("### 5. AMBIENTE ÉTICO (COMPLIANCE)")
-            p5_1 = st.radio("5.1 No último ano, você foi exposto a situações de humilhação ou insultos?", list(esc.keys()), index=None)
+            p5_1 = st.radio("5.1 No último ano, foi exposto a situações de humilhação ou insultos?", list(esc.keys()), index=None)
             p5_2 = st.radio("5.2 Foi alvo de comentários ou avanços sexuais indesejados?", list(esc.keys()), index=None)
         
         if st.form_submit_button("✅ SALVAR AVALIAÇÃO"):
@@ -133,4 +134,4 @@ with tab2:
 
 # --- RODAPÉ TÉCNICO ---
 st.markdown("---")
-st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. Sistema avaliado via COPSOQ III.")
+st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. Sistema de Monitoramento Blindado via COPSOQ III.")
