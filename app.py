@@ -5,21 +5,19 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS E CONEXÃO
-st.set_page_config(page_title="HMM - Gestão Psicossocial V24.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Psicossocial V24.1", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# --- CABEÇALHO PROFISSIONAL ---
-st.title("🚀 Diagnóstico de Riscos Psicossociais")
-st.subheader("HMM Serviços - Engenharia e Segurança do Trabalho")
-st.markdown(f"**Responsável Técnico:** Eng. Henrique | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
+# --- CABEÇALHO ---
+st.title("Avaliação de Riscos Psicossociais")
+st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
+st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-# --- AVISO DE ANONIMATO (INÍCIO) ---
-st.warning("🔒 **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
-           "As respostas são tratadas de forma estatística e coletiva pela HMM Serviços, "
-           "garantindo o sigilo total da identidade do respondente.")
+# --- AVISO DE ANONIMATO ---
+st.warning(" **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima.")
 
-tab1, tab2 = st.tabs(["📝 Formulário de Coleta (41 Itens)", "📊 Painel de Resultados & Plano de Ação"])
+tab1, tab2 = st.tabs([" Formulário de Coleta", " Painel de Resultados"])
 
 # --- DICIONÁRIOS DE ESCALAS ---
 esc_f = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca / Quase nunca": 0}
@@ -28,9 +26,9 @@ esc_int = {"Extremamente": 100, "Muito": 75, "Moderadamente": 50, "Um pouco": 25
 esc_sau = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 esc_n9 = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 
-# --- ABA 1: FORMULÁRIO ---
+# --- ABA 1: FORMULÁRIO (MANTIDO CONFORME VERSÃO ANTERIOR) ---
 with tab1:
-    with st.form("form_v24_0", clear_on_submit=True):
+    with st.form("form_v24_1", clear_on_submit=True):
         st.markdown("### 📋 Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
@@ -76,7 +74,7 @@ with tab1:
             st.success("### 6. SEGURANÇA E SAÚDE")
             q28 = st.radio("**28. Tem medo de ficar desempregado?**", list(esc_int.keys()), index=None)
             q29 = st.radio("**29. Como avalia sua saúde geral?**", list(esc_sau.keys()), index=None)
-            st.success("### 7. VIDA PRIVADA")
+            st.success("### 7. VIDA PESSOAL")
             q30 = st.radio("**30. Trabalho tira energia da vida privada?**", list(esc_int.keys()), index=None)
             q31 = st.radio("**31. Trabalho toma tempo da vida privada?**", list(esc_int.keys()), index=None)
             st.error("### 8. SAÚDE MENTAL")
@@ -115,10 +113,10 @@ with tab1:
                     st.success("✅ DADOS GRAVADOS COM SIGILO!")
                 except Exception as e: st.error(f"Erro: {e}")
 
-# --- ABA 2: PAINEL DE GESTÃO ---
+# --- ABA 2: PAINEL DE GESTÃO (COM SUGESTÕES CORRIGIDAS) ---
 with tab2:
-    st.subheader("🔐 Painel do Consultor HMM")
-    acesso = st.text_input("Senha:", type="password", key="pwd_v24_0")
+    st.subheader(" Painel do Consultor HMM")
+    acesso = st.text_input("Senha:", type="password", key="pwd_v24_1")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -132,7 +130,7 @@ with tab2:
                 if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
                 
-                st.markdown("### 📊 Radar de Riscos")
+                # Gráfico de Radar
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
@@ -141,14 +139,21 @@ with tab2:
                 for dim, valor in m.items():
                     cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                     st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
-                    if dim == "Demanda" and valor > 50: st.caption("👉 **Sugestão:** Revisar distribuição de carga e prazos.")
-                    if dim == "Lideranca" and valor > 50: st.caption("👉 **Sugestão:** Treinamento de Soft Skills para gestores.")
-                    if dim == "Ofensivo" and valor > 10: st.caption("👉 **Atenção:** Implementar Compliance e Canal de Denúncias.")
+                    
+                    # AJUSTE DE GATILHOS (Trigger > 33 para mostrar sugestões de Atenção)
+                    if dim == "Demanda" and valor > 33:
+                        st.caption("👉 **Atenção:** Revisar distribuição de carga, análise de tempos e métodos.")
+                    if dim == "Controle" and valor > 33:
+                        st.caption("👉 **Atenção:** Fomentar autonomia técnica e participação nas decisões.")
+                    if dim == "Lideranca" and valor > 33:
+                        st.caption("👉 **Atenção:** Programa de desenvolvimento de lideranças e suporte social.")
+                    if dim == "Saude_Mental" and valor > 33:
+                        st.caption("👉 **Atenção:** Monitoramento de fadiga e promoção de saúde mental.")
+                    if dim == "Ofensivo" and valor > 0:
+                        st.caption("👉 **Crítico:** Auditoria ética, Canal de Denúncias e Treinamento Anti-Assédio.")
                     st.markdown("---")
         else: st.warning("Sem dados.")
 
-# --- RODAPÉ DE DIREITOS AUTORAIS (FIM DA PÁGINA) ---
+# --- RODAPÉ ---
 st.markdown("---")
-st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. "
-           "Todos os direitos reservados. É proibida a reprodução total ou parcial "
-           "deste questionário e metodologia sem autorização prévia por escrito.")
+st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. Direitos Autorais Reservados.")
