@@ -31,10 +31,10 @@ with tab1:
     with st.form("form_v24_1", clear_on_submit=True):
         st.markdown("###  Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
-        with c1: emp = st.text_input("Empresa Cliente:")
+        with c1: emp = st.text_input("Nome da Empresa:")
         with c2: setr = st.text_input("Setor:")
-        with c3: func = st.text_input("Função (Opcional):")
-        with c4: idade_val = st.number_input("Idade:", min_value=14, max_value=100, value=30)
+        with c3: func = st.text_input("Função:")
+        with c4: idade_val = st.number_input("Idade:", min_value=14, max_value=100, value=18)
 
         col_a, col_b = st.columns(2)
         with col_a:
