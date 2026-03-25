@@ -29,7 +29,7 @@ esc_n9 = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, 
 # --- ABA 1: FORMULÁRIO (MANTIDO CONFORME VERSÃO ANTERIOR) ---
 with tab1:
     with st.form("form_v24_1", clear_on_submit=True):
-        st.markdown("### 📋 Identificação Geral")
+        st.markdown("###  Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
         with c2: setr = st.text_input("Setor:")
