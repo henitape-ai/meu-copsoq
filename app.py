@@ -9,16 +9,16 @@ st.set_page_config(page_title="HMM - Gestão V24.5", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
-st.title("🚀 Diagnóstico de Riscos Psicossociais")
-st.subheader("HMM Serviços - Engenharia e Segurança do Trabalho")
-st.markdown(f"**Responsável Técnico:** Eng. Henrique | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
+st.title("Avaliação de Riscos Psicossociais")
+st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
+st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda| 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
 # --- AVISO DE ANONIMATO ---
-st.warning("🔒 **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
+st.warning("**AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
            "As respostas são tratadas de forma coletiva, garantindo o sigilo do respondente.")
 
-tab1, tab2 = st.tabs(["📝 Formulário de Coleta (41 Itens)", "📊 Painel de Resultados & Plano de Ação"])
+tab1, tab2 = st.tabs(["📝 Formulário de Coleta (41 Itens)", "📊 Painel de Resultados])
 
 # --- DICIONÁRIOS DE ESCALAS PADRONIZADAS ---
 # Escala Geral (Frequência, Intensidade e Saúde agora unificadas visualmente)
