@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Psicossocial V24.3", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Psicossocial V24.4", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
@@ -30,7 +30,7 @@ esc_n9 = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, 
 
 # --- ABA 1: FORMULÁRIO ---
 with tab1:
-    with st.form("form_v24_3", clear_on_submit=True):
+    with st.form("form_v24_4", clear_on_submit=True):
         st.markdown("### 📋 Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
@@ -52,7 +52,7 @@ with tab1:
             q8 = st.radio("**8. O seu trabalho exige que você tenha iniciativa própria?**", list(esc_inv.keys()), index=None)
             q9 = st.radio("**9. No seu serviço, você consegue aprender coisas novas?**", list(esc_inv.keys()), index=None)
             st.info("### 3. COMUNICAÇÃO")
-            q10 = st.radio("**10. Avisado com antecedência sobre mudanças e planos da empresa?**", list(esc_inv.keys()), index=None)
+            q10 = st.radio("**10. Avisado sobre mudanças e planos da empresa?**", list(esc_inv.keys()), index=None)
             q11 = st.radio("**11. Recebe as informações que precisa para trabalhar bem?**", list(esc_inv.keys()), index=None)
             q12 = st.radio("**12. Você sabe exatamente quais são as suas responsabilidades?**", list(esc_inv.keys()), index=None)
             st.info("### 4. LIDERANÇA")
@@ -118,8 +118,7 @@ with tab1:
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
     st.subheader("🔐 Painel do Consultor HMM")
-    # Senha com chave exclusiva fora de formulário
-    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_3")
+    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_4")
     
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
@@ -147,16 +146,21 @@ with tab2:
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
 
-                st.markdown("### 📋 Médias e Sugestões Técnicas")
+                st.markdown("### 📋 Médias Detalhadas e Sugestões HMM")
                 for dim, valor in m.items():
                     cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                     st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
+                    
+                    # Gatilho de Sugestão Técnica (> 33 pontos)
                     if valor > 33:
-                        if dim == "Demanda": st.caption("👉 **Atenção:** Revisar distribuição de carga e prazos.")
-                        if dim == "Lideranca": st.caption("👉 **Atenção:** Treinamento de Soft Skills para gestores.")
-                        if dim == "Ofensivo": st.caption("👉 **Crítico:** Implementar Compliance e Canal de Denúncias.")
+                        if dim == "Demanda": st.caption("👉 **Atenção:** Revisar distribuição de carga, análise de tempos e métodos (NR-17).")
+                        if dim == "Controle": st.caption("👉 **Atenção:** Fomentar autonomia técnica e maior participação nas decisões operacionais.")
+                        if dim == "Lideranca": st.caption("👉 **Atenção:** Implementar treinamento de Soft Skills e canais de feedback para gestores.")
+                        if dim == "Satisfacao": st.caption("👉 **Atenção:** Avaliar planos de reconhecimento e valorização profissional.")
+                        if dim == "Saude_Mental": st.caption("👉 **Atenção:** Implementar programas de higiene do sono e monitoramento de fadiga mental.")
+                        if dim == "Ofensivo" and valor > 0: st.caption("👉 **Crítico:** Auditoria ética imediata, Canal de Denúncias e treinamento anti-assédio.")
                     st.markdown("---")
-        else: st.warning("Aguardando registros.")
+        else: st.warning("Aguardando registros na base de dados.")
 
 # --- RODAPÉ DE DIREITOS AUTORAIS ---
 st.markdown("---")
