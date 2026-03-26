@@ -14,7 +14,7 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** Coleta realizada de forma estritamente anônima. Sigilo garantido.")
+st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** Coleta de dados realizada de forma estritamente anônima.")
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
