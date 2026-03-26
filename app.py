@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS E CONEXÃO
-st.set_page_config(page_title="HMM - Gestão V24.6", layout="wide")
+st.set_page_config(page_title="HMM - Gestão V24.7", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
@@ -15,10 +15,9 @@ st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.h
 st.markdown("---")
 
 # --- AVISO DE ANONIMATO ---
-st.warning(" **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
-           "As respostas serão tratadas de forma coletiva, garantindo o sigilo do respondente.")
+st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
+           "As respostas são tratadas de forma coletiva, garantindo o sigilo do respondente.")
 
-# CORREÇÃO DA LINHA 21: Aspas fechadas corretamente agora
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
 # --- DICIONÁRIOS DE ESCALAS PADRONIZADAS ---
@@ -30,7 +29,7 @@ map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25,
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca / Quase nunca": 100}
 
 with tab1:
-    with st.form("form_v24_6", clear_on_submit=True):
+    with st.form("form_v24_7", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
@@ -126,7 +125,7 @@ with tab1:
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
     st.subheader("🔐 Painel do Consultor HMM")
-    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_6")
+    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_7")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -144,13 +143,17 @@ with tab2:
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
 
+                st.markdown("### 📋 Sugestões Técnicas por Dimensão")
                 for dim, valor in m.items():
                     cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                     st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
                     if valor > 33:
-                        if dim == "Demanda": st.caption("👉 **Atenção:** Revisar distribuição de carga e prazos.")
-                        if dim == "Lideranca": st.caption("👉 **Atenção:** Treinamento de Soft Skills para gestores.")
-                        if dim == "Ofensivo": st.caption("👉 **Crítico:** Auditoria ética e Canal de Denúncias.")
+                        if dim == "Demanda": st.caption("👉 **Sugestão:** Revisar a distribuição de carga e os prazos de entrega.")
+                        if dim == "Controle": st.caption("👉 **Sugestão:** Aumentar a autonomia técnica e a participação nas decisões operacionais.")
+                        if dim == "Lideranca": st.caption("👉 **Sugestão:** Implementar treinamentos de gestão humanizada e canais de feedback.")
+                        if dim == "Satisfacao": st.caption("👉 **Sugestão:** Avaliar planos de carreira e programas de reconhecimento profissional.")
+                        if dim == "Saude_Mental": st.caption("👉 **Sugestão:** Promover ações de bem-estar e monitoramento de estresse ocupacional.")
+                        if dim == "Ofensivo" and valor > 0: st.caption("👉 **CRÍTICO:** Realizar auditoria ética e reforçar o canal de denúncias.")
                     st.markdown("---")
         else: st.warning("Aguardando registros.")
 
