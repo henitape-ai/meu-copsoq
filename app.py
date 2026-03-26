@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS E CONEXÃO
-st.set_page_config(page_title="HMM - Gestão V24.7", layout="wide")
+st.set_page_config(page_title="HMM - Gestão V24.8", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
@@ -29,7 +29,7 @@ map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25,
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca / Quase nunca": 100}
 
 with tab1:
-    with st.form("form_v24_7", clear_on_submit=True):
+    with st.form("form_v24_8", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
@@ -46,17 +46,14 @@ with tab1:
             q4 = st.radio("**4. O seu serviço exige atenção total o tempo todo?**", esc_padrao, index=None)
             q5 = st.radio("**5. Você precisa tomar decisões muito difíceis no dia a dia?**", esc_padrao, index=None)
             q6 = st.radio("**6. O seu trabalho é cansativo do ponto de vista emocional?**", esc_padrao, index=None)
-            
             st.info("### 2. SUA AUTONOMIA")
             q7 = st.radio("**7. Você consegue decidir como fazer as suas tarefas?**", esc_padrao, index=None)
             q8 = st.radio("**8. O seu trabalho exige que você tenha iniciativa própria?**", esc_padrao, index=None)
             q9 = st.radio("**9. No seu serviço, você consegue aprender coisas novas?**", esc_padrao, index=None)
-            
             st.info("### 3. COMUNICAÇÃO")
             q10 = st.radio("**10. Avisado com antecedência sobre mudanças e planos da empresa?**", esc_padrao, index=None)
             q11 = st.radio("**11. Recebe as informações que precisa para trabalhar bem?**", esc_padrao, index=None)
             q12 = st.radio("**12. Você sabe exatamente quais são as suas responsabilidades?**", esc_padrao, index=None)
-            
             st.info("### 4. LIDERANÇA")
             q13 = st.radio("**13. A chefia reconhece e valoriza o que você faz?**", esc_padrao, index=None)
             q14 = st.radio("**14. Você sente que é tratado de forma justa na empresa?**", esc_padrao, index=None)
@@ -68,7 +65,6 @@ with tab1:
             q20 = st.radio("**20. Você confia nas informações que recebe da gerência?**", esc_padrao, index=None)
             q21 = st.radio("**21. Os problemas no setor são resolvidos de forma justa?**", esc_padrao, index=None)
             q22 = st.radio("**22. O trabalho é dividido de forma igual entre as pessoas?**", esc_padrao, index=None)
-            
         with col_b:
             st.success("### 5. SATISFAÇÃO")
             q23 = st.radio("**23. Você se sente capaz de resolver os problemas que aparecem?**", esc_padrao, index=None)
@@ -76,15 +72,12 @@ with tab1:
             q25 = st.radio("**25. Você sente que o que você faz é importante?**", esc_padrao, index=None)
             q26 = st.radio("**26. Você sente que os problemas da empresa também são seus?**", esc_padrao, index=None)
             q27 = st.radio("**27. No geral, o quanto você está satisfeito com seu trabalho?**", esc_padrao, index=None)
-            
             st.success("### 6. SEGURANÇA E SAÚDE")
             q28 = st.radio("**28. Você sente medo de perder o emprego?**", esc_padrao, index=None)
             q29 = st.radio("**29. De forma geral, como você avalia a sua saúde?**", esc_padrao, index=None)
-            
             st.success("### 7. TRABALHO E VIDA PESSOAL")
             q30 = st.radio("**30. O trabalho tira a energia da sua vida particular?**", esc_padrao, index=None)
             q31 = st.radio("**31. O trabalho toma muito do seu tempo privado?**", esc_padrao, index=None)
-            
             st.error("### 8. SAÚDE E BEM ESTAR")
             q32 = st.radio("**32. Teve dificuldade para dormir ou acordou muito à noite?**", esc_padrao, index=None)
             q33 = st.radio("**33. Sentiu-se esgotado fisicamente?**", esc_padrao, index=None)
@@ -92,7 +85,6 @@ with tab1:
             q35 = st.radio("**35. Sentiu-se irritado com facilidade?**", esc_padrao, index=None)
             q36 = st.radio("**36. Sentiu-se ansioso?**", esc_padrao, index=None)
             q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
-            
             st.error("### 9. COMPORTAMENTO OFENSIVO")
             q38 = st.radio("**38. Foi alvo de insultos ou provocações verbais?**", esc_assedio, index=None)
             q39 = st.radio("**39. Passou por situação de assédio sexual indesejado?**", esc_assedio, index=None)
@@ -120,12 +112,13 @@ with tab1:
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
                     st.success("✅ DADOS GRAVADOS COM SUCESSO!")
+                    st.balloons() # BALÕES ADICIONADOS AQUI
                 except Exception as e: st.error(f"Erro: {e}")
 
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
     st.subheader("🔐 Painel do Consultor HMM")
-    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_7")
+    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_8")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -143,17 +136,21 @@ with tab2:
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
 
-                st.markdown("### 📋 Sugestões Técnicas por Dimensão")
+                st.markdown("### 📋 Médias Detalhadas e Plano de Ação (Sugestões HMM)")
                 for dim, valor in m.items():
                     cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                     st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
+                    
+                    # LOGICA PARA TODAS AS DIMENSÕES APARECEREM (Trigger > 33)
                     if valor > 33:
-                        if dim == "Demanda": st.caption("👉 **Sugestão:** Revisar a distribuição de carga e os prazos de entrega.")
-                        if dim == "Controle": st.caption("👉 **Sugestão:** Aumentar a autonomia técnica e a participação nas decisões operacionais.")
-                        if dim == "Lideranca": st.caption("👉 **Sugestão:** Implementar treinamentos de gestão humanizada e canais de feedback.")
-                        if dim == "Satisfacao": st.caption("👉 **Sugestão:** Avaliar planos de carreira e programas de reconhecimento profissional.")
-                        if dim == "Saude_Mental": st.caption("👉 **Sugestão:** Promover ações de bem-estar e monitoramento de estresse ocupacional.")
+                        if dim == "Demanda": st.caption("👉 **Sugestão:** Revisar a distribuição de carga e os prazos (NR-17).")
+                        if dim == "Controle": st.caption("👉 **Sugestão:** Aumentar a autonomia técnica e participação nas decisões.")
+                        if dim == "Lideranca": st.caption("👉 **Sugestão:** Treinamento de Soft Skills para gestores e feedback constante.")
+                        if dim == "Satisfacao": st.caption("👉 **Sugestão:** Avaliar programas de reconhecimento e valorização profissional.")
+                        if dim == "Saude_Mental": st.caption("👉 **Sugestão:** Monitoramento de fadiga e promoção de saúde mental ocupacional.")
                         if dim == "Ofensivo" and valor > 0: st.caption("👉 **CRÍTICO:** Realizar auditoria ética e reforçar o canal de denúncias.")
+                    else:
+                        st.caption("✅ **Status:** Indicador em nível aceitável. Manter monitoramento preventivo.")
                     st.markdown("---")
         else: st.warning("Aguardando registros.")
 
