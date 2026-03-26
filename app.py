@@ -86,7 +86,7 @@ with tab1:
             q30 = st.radio("**30. O trabalho tira a energia da sua vida particular?**", esc_padrao, index=None)
             q31 = st.radio("**31. O trabalho toma muito do seu tempo privado?**", esc_padrao, index=None)
             
-            st.error("### 8. COMO VOCÊ SE SENTE")
+            st.error("### 8. SAÚDE E BEM ESTAR")
             q32 = st.radio("**32. Teve dificuldade para dormir ou acordou muito à noite?**", esc_padrao, index=None)
             q33 = st.radio("**33. Sentiu-se esgotado fisicamente?**", esc_padrao, index=None)
             q34 = st.radio("**34. Sentiu-se esgotado emocionalmente?**", esc_padrao, index=None)
@@ -94,7 +94,7 @@ with tab1:
             q36 = st.radio("**36. Sentiu-se ansioso?**", esc_padrao, index=None)
             q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
             
-            st.error("### 9. ÉTICA E OFENSIVO")
+            st.error("### 9. COMPORTAMENTO OFENSIVO")
             q38 = st.radio("**38. Foi alvo de insultos ou provocações verbais?**", esc_assedio, index=None)
             q39 = st.radio("**39. Passou por situação de assédio sexual indesejado?**", esc_assedio, index=None)
             q40 = st.radio("**40. Sofreu ameaças de violência?**", esc_assedio, index=None)
