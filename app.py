@@ -9,17 +9,17 @@ st.set_page_config(page_title="HMM - Gestão V24.6", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO PROFISSIONAL ---
-st.title("🚀 Diagnóstico de Riscos Psicossociais")
-st.subheader("HMM Serviços - Engenharia e Segurança do Trabalho")
-st.markdown(f"**Responsável Técnico:** Eng. Henrique | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
+st.title("Avaliação de Riscos Psicossociais")
+st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
+st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
 # --- AVISO DE ANONIMATO ---
-st.warning("🔒 **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
-           "As respostas são tratadas de forma coletiva, garantindo o sigilo do respondente.")
+st.warning(" **AVALIAÇÃO ANÔNIMA:** Esta coleta de dados é realizada de forma estritamente anônima. "
+           "As respostas serão tratadas de forma coletiva, garantindo o sigilo do respondente.")
 
 # CORREÇÃO DA LINHA 21: Aspas fechadas corretamente agora
-tab1, tab2 = st.tabs(["📝 Formulário de Coleta (41 Itens)", "📊 Painel de Resultados & Plano de Ação"])
+tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
 # --- DICIONÁRIOS DE ESCALAS PADRONIZADAS ---
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca / Quase nunca"]
@@ -31,7 +31,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 
 with tab1:
     with st.form("form_v24_6", clear_on_submit=True):
-        st.markdown("### 📋 Identificação Geral")
+        st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:")
         with c2: setr = st.text_input("Setor:")
@@ -156,4 +156,4 @@ with tab2:
 
 # --- RODAPÉ ---
 st.markdown("---")
-st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. Todos os direitos reservados.")
+st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho. Todos os direitos reservados.")
