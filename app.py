@@ -88,4 +88,77 @@ with tab1:
             q37 = st.radio("**37. Sentiu-se triste?**", list(esc_f.keys()), index=None)
             st.error("### 9. ÉTICA E OFENSIVO")
             q38 = st.radio("**38. Foi alvo de insultos ou provocações verbais?**", list(esc_n9.keys()), index=None)
-            q
+            q39 = st.radio("**39. Passou por situação de assédio sexual indesejado?**", list(esc_n9.keys()), index=None)
+            q40 = st.radio("**40. Sofreu ameaças de violência?**", list(esc_n9.keys()), index=None)
+            q41 = st.radio("**41. Sofreu algum tipo de agressão física?**", list(esc_n9.keys()), index=None)
+
+        if st.form_submit_button("✅ GRAVAR DIAGNÓSTICO"):
+            resps = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
+            if None in resps or not emp or not setr:
+                st.error("⚠️ Responda todas as perguntas.")
+            else:
+                try:
+                    v_dem = (esc_f[q1]+esc_f[q2]+esc_f[q3]+esc_f[q4]+esc_f[q5]+esc_f[q6])/6
+                    v_con = (esc_inv[q7]+esc_inv[q8]+esc_inv[q9])/3
+                    v_lid = (esc_inv[q13]+esc_inv[q14]+esc_inv[q15]+esc_inv[q16]+esc_inv[q17]+esc_inv[q18]+esc_inv[q19]+esc_inv[q20]+esc_inv[q21]+esc_inv[q22])/10
+                    v_men = (esc_f[q32]+esc_f[q33]+esc_f[q34]+esc_f[q35]+esc_f[q36]+esc_f[q37])/6
+                    v_ofe = (esc_n9[q38]+esc_n9[q39]+esc_n9[q40]+esc_n9[q41])/4
+                    nova_linha = pd.DataFrame([{
+                        "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
+                        "Empresa": emp.strip(), "Setor": setr.strip(), "Funcao": func.strip(), "Idade": idade_val,
+                        "Demanda": v_dem, "Controle": v_con, "Lideranca": v_lid,
+                        "Satisfacao": esc_int[q27], "Saude_Geral": esc_sau[q29], 
+                        "Saude_Mental": v_men, "Ofensivo": v_ofe
+                    }])
+                    df_b = conn.read(worksheet="Página1", ttl=0)
+                    conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
+                    st.success("✅ DADOS GRAVADOS COM SUCESSO!")
+                except Exception as e: st.error(f"Erro: {e}")
+
+# --- ABA 2: PAINEL DE GESTÃO ---
+with tab2:
+    st.subheader("🔐 Painel do Consultor HMM")
+    # Senha com chave exclusiva fora de formulário
+    acesso = st.text_input("Senha de Acesso:", type="password", key="pwd_v24_3")
+    
+    if acesso == "HMM2024":
+        df = conn.read(worksheet="Página1", ttl=0)
+        if not df.empty:
+            df['Empresa'] = df['Empresa'].astype(str).str.strip()
+            df['Setor'] = df['Setor'].astype(str).str.strip()
+            
+            st.markdown("### 🔍 Filtros de Análise")
+            c1, c2 = st.columns(2)
+            with c1:
+                lista_emp = sorted(df['Empresa'].unique())
+                emp_sel = st.selectbox("Selecione o Cliente:", lista_emp, index=None)
+            if emp_sel:
+                with c2:
+                    lista_set = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
+                    set_sel = st.multiselect("Filtrar Setores:", lista_set)
+                
+                df_f = df[df['Empresa'] == emp_sel]
+                if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
+                
+                m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
+                
+                # Gráfico de Radar
+                fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
+                fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
+                st.plotly_chart(fig, use_container_width=True)
+
+                st.markdown("### 📋 Médias e Sugestões Técnicas")
+                for dim, valor in m.items():
+                    cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
+                    st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
+                    if valor > 33:
+                        if dim == "Demanda": st.caption("👉 **Atenção:** Revisar distribuição de carga e prazos.")
+                        if dim == "Lideranca": st.caption("👉 **Atenção:** Treinamento de Soft Skills para gestores.")
+                        if dim == "Ofensivo": st.caption("👉 **Crítico:** Implementar Compliance e Canal de Denúncias.")
+                    st.markdown("---")
+        else: st.warning("Aguardando registros.")
+
+# --- RODAPÉ DE DIREITOS AUTORAIS ---
+st.markdown("---")
+st.caption("© 2026 HMM Serviços - Engenharia e Segurança do Trabalho. "
+           "Todos os direitos reservados. Proibida a reprodução sem autorização.")
