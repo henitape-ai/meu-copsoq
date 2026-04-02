@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão V25.5", layout="wide")
+st.set_page_config(page_title="HMM - Gestão V25.6", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
@@ -14,7 +14,7 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-# --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES (NOVO) ---
+# --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES REVISADAS ---
 with st.container():
     st.markdown("""
     ### 📝 Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho! 
@@ -24,12 +24,12 @@ with st.container():
     
     col_inst1, col_inst2 = st.columns(2)
     with col_inst1:
-        st.write("- **NUNCA:** O comportamento não ocorre em nenhuma situação.")
-        st.write("- **RARAMENTE:** O comportamento ocorre em pouquíssimas situações.")
-        st.write("- **ÀS VEZES:** O comportamento ocorre em algumas situações, mas não é frequente.")
+        st.write("- **NUNCA:** não ocorre em nenhuma situação.")
+        st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
+        st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
     with col_inst2:
-        st.write("- **FREQUENTEMENTE:** O comportamento ocorre na maioria das situações.")
-        st.write("- **SEMPRE:** O comportamento ocorre em todas as situações.")
+        st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
+        st.write("- **SEMPRE:** ocorre em todas as situações.")
     
     st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima.")
     st.markdown("---")
@@ -46,7 +46,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v25_5", clear_on_submit=True):
+    with st.form("form_v25_6", clear_on_submit=True):
         st.markdown("### 1️⃣ Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -143,7 +143,7 @@ with tab1:
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel do Consultor HMM")
-    acesso = st.text_input("Senha:", type="password", key="pwd_v25_5")
+    acesso = st.text_input("Senha:", type="password", key="pwd_v25_6")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
