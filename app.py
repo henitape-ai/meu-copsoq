@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão V25.4 Final", layout="wide")
+st.set_page_config(page_title="HMM - Gestão V25.5", layout="wide")
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
@@ -14,7 +14,25 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** Coleta de dados realizada de forma estritamente anônima.")
+# --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES (NOVO) ---
+with st.container():
+    st.markdown("""
+    ### 📝 Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho! 
+    Suas respostas são **confidenciais** e ajudarão a promover melhorias no local de trabalho. 
+    Por favor, leia atentamente as opções de resposta antes de iniciar:
+    """)
+    
+    col_inst1, col_inst2 = st.columns(2)
+    with col_inst1:
+        st.write("- **NUNCA:** O comportamento não ocorre em nenhuma situação.")
+        st.write("- **RARAMENTE:** O comportamento ocorre em pouquíssimas situações.")
+        st.write("- **ÀS VEZES:** O comportamento ocorre em algumas situações, mas não é frequente.")
+    with col_inst2:
+        st.write("- **FREQUENTEMENTE:** O comportamento ocorre na maioria das situações.")
+        st.write("- **SEMPRE:** O comportamento ocorre em todas as situações.")
+    
+    st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima.")
+    st.markdown("---")
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
@@ -23,14 +41,13 @@ esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_assedio = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude_qualidade = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# Mapeamentos (Garantindo que todos os índices existam)
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v25_4_final", clear_on_submit=True):
-        st.markdown("### Identificação Geral")
+    with st.form("form_v25_5", clear_on_submit=True):
+        st.markdown("### 1️⃣ Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
         with c2: setr = st.text_input("Setor:").strip()
@@ -99,15 +116,12 @@ with tab1:
             q40 = st.radio("**40. Sofreu ameaças de violência?**", esc_assedio, index=None)
             q41 = st.radio("**41. Sofreu agressão física?**", esc_assedio, index=None)
 
-        submit = st.form_submit_button("✅ GRAVAR DIAGNÓSTICO")
-        
-        if submit:
+        if st.form_submit_button("✅ GRAVAR DIAGNÓSTICO"):
             resps = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
             if None in resps or not emp or not setr:
-                st.error("⚠️ Responda todas as perguntas e preencha Empresa/Setor.")
+                st.error("⚠️ Responda todas as perguntas.")
             else:
                 try:
-                    # Cálculos
                     v_dem = (map_dir[q1]+map_dir[q2]+map_dir[q3]+map_dir[q4]+map_dir[q5]+map_dir[q6])/6
                     v_con = (map_inv[q7]+map_inv[q8]+map_inv[q9]+map_inv[q10]+map_inv[q11]+map_inv[q12])/6
                     v_lid = (map_inv[q13]+map_inv[q14]+map_inv[q15]+map_inv[q16]+map_inv[q17]+map_inv[q18]+map_inv[q19]+map_inv[q20]+map_inv[q21]+map_inv[q22])/10
@@ -120,70 +134,54 @@ with tab1:
                         "Demanda": v_dem, "Controle": v_con, "Lideranca": v_lid,
                         "Satisfacao": map_dir[q27], "Saude_Mental": v_men, "Ofensivo": v_ofe
                     }])
-                    
-                    # Leitura segura
-                    try:
-                        df_existente = conn.read(worksheet="Página1", ttl=0)
-                    except:
-                        df_existente = pd.DataFrame()
-                        
-                    df_final = pd.concat([df_existente, nova_linha], ignore_index=True)
-                    conn.update(worksheet="Página1", data=df_final)
+                    df_b = conn.read(worksheet="Página1", ttl=0)
+                    conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
                     st.success("✅ DADOS GRAVADOS COM SUCESSO!")
                     st.balloons()
-                except Exception as e:
-                    st.error(f"Erro ao gravar: {e}")
+                except Exception as e: st.error(f"Erro: {e}")
 
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel do Consultor HMM")
-    acesso = st.text_input("Senha:", type="password")
+    acesso = st.text_input("Senha:", type="password", key="pwd_v25_5")
     if acesso == "HMM2024":
-        try:
-            df = conn.read(worksheet="Página1", ttl=0)
-            if not df.empty:
-                df['Empresa'] = df['Empresa'].astype(str).str.strip()
-                clientes = sorted(df['Empresa'].unique())
-                emp_sel = st.selectbox("Selecione o Cliente:", clientes, index=None)
+        df = conn.read(worksheet="Página1", ttl=0)
+        if not df.empty:
+            df['Empresa'] = df['Empresa'].astype(str).str.strip()
+            df['Setor'] = df['Setor'].astype(str).str.strip()
+            emp_sel = st.selectbox("Selecione o Cliente:", sorted(df['Empresa'].unique()), index=None)
+            if emp_sel:
+                lista_set = sorted(df[df['Empresa'] == emp_sel]['Setor'].unique())
+                set_sel = st.multiselect("Filtrar Setores:", lista_set)
+                df_f = df[df['Empresa'] == emp_sel]
+                if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 
-                if emp_sel:
-                    df_cli = df[df['Empresa'] == emp_sel]
-                    setores = sorted(df_cli['Setor'].unique())
-                    set_sel = st.multiselect("Filtrar Setores:", setores)
-                    
-                    df_f = df_cli if not set_sel else df_cli[df_cli['Setor'].isin(set_sel)]
-                    
-                    # Médias para o Radar
-                    colunas_radar = ['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']
-                    m = df_f[colunas_radar].mean()
-                    
-                    fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
-                    fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
-                    st.plotly_chart(fig, use_container_width=True)
+                m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
+                
+                fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
+                fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
+                st.plotly_chart(fig, use_container_width=True)
 
-                    st.markdown("### 📋 Plano de Prevenção Ocupacional")
-                    for dim, valor in m.items():
-                        if dim == "Ofensivo" and valor > 0:
-                            st.error(f"🚨 **{dim}: {valor:.1f} - ALERTA CRÍTICO**")
-                            st.caption("👉 **Ação:** Auditoria ética imediata e reforço do Canal de Denúncias.")
-                        else:
-                            cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
-                            st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
-                            
-                            sugestoes = {
-                                "Demanda": "Revisar distribuição de carga e prazos (NR-17).",
-                                "Controle": "Aumentar autonomia técnica e participação decisória.",
-                                "Lideranca": "Treinamento de Soft Skills e feedbacks constantes.",
-                                "Satisfacao": "Avaliar planos de reconhecimento e valorização.",
-                                "Saude_Mental": "Programas de bem-estar e monitoramento de fadiga."
-                            }
-                            if dim in sugestoes:
-                                st.caption(f"👉 **Ação:** {sugestoes[dim]}")
-                        st.markdown("---")
-            else:
-                st.info("Planilha vazia. Aguardando registros.")
-        except Exception as e:
-            st.error(f"Erro ao carregar dados: {e}")
+                st.markdown("### 📋 Médias e Plano de Ação Ocupacional")
+                for dim, valor in m.items():
+                    if dim == "Ofensivo" and valor > 0:
+                        st.error(f"🚨 **{dim}: {valor:.1f} - ALERTA CRÍTICO**")
+                        st.caption("👉 **Ação:** Auditoria ética imediata e reforço do Canal de Denúncias.")
+                    else:
+                        cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
+                        st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
+                        
+                        sugestoes = {
+                            "Demanda": "Revisar distribuição de carga e prazos (NR-17).",
+                            "Controle": "Aumentar autonomia técnica e participação decisória.",
+                            "Lideranca": "Treinamento de Soft Skills e feedbacks constantes.",
+                            "Satisfacao": "Avaliar planos de reconhecimento e valorização.",
+                            "Saude_Mental": "Programas de bem-estar e monitoramento de fadiga."
+                        }
+                        if dim in sugestoes:
+                            st.caption(f"👉 **Ação:** {sugestoes[dim]}")
+                    st.markdown("---")
+        else: st.warning("Aguardando registros.")
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
