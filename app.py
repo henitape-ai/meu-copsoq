@@ -5,16 +5,32 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V25.8", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V25.9", layout="wide")
 
-# --- BLOCO DE ESTILO (BRANDING PROFISSIONAL HMM) ---
-# Esconde Menu, Rodapé, Header e o botão 'Manage App'
+# --- BLOCO DE ESTILO (LIMPEZA TOTAL DESKTOP & MOBILE) ---
 hide_st_style = """
             <style>
+            /* Esconde Menu, Header e Footer padrão */
             #MainMenu {visibility: hidden;}
-            footer {visibility: hidden;}
             header {visibility: hidden;}
-            .stAppDeployButton {display: none;}
+            footer {visibility: hidden;}
+            
+            /* Esconde o botão 'Manage app' e botões de deploy (Desktop e Mobile) */
+            .stAppDeployButton {display: none !important;}
+            stDecoration {display: none !important;}
+            
+            /* Remove espaços em branco no topo (ajuste para Mobile) */
+            .block-container {
+                padding-top: 1rem !important;
+                padding-bottom: 0rem !important;
+            }
+            
+            /* Remove a barra de ferramentas flutuante do Streamlit */
+            [data-testid="stHeader"] {display: none !important;}
+            [data-testid="stToolbar"] {display: none !important;}
+            
+            /* Esconde o botão de 'Manage App' específico do mobile */
+            footer {display: none !important;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -54,15 +70,15 @@ tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"]
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude_qualidade = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# Mapeamento Direto: Sempre = Risco 100 (Para Demanda, Saúde Mental, Ofensivo)
+# Mapeamento Direto: Sempre = Risco 100
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
-# Mapeamento Inverso: Sempre = Risco 0 (Para Autonomia, Liderança, Satisfação)
+# Mapeamento Inverso: Sempre = Risco 0 (Fatores de Proteção)
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 # Mapeamento Saúde
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v25_8", clear_on_submit=True):
+    with st.form("form_v25_9", clear_on_submit=True):
         st.markdown("### 1️⃣ Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -124,7 +140,6 @@ with tab1:
             q34 = st.radio("**34. Esgotado emocionalmente?**", esc_padrao, index=None)
             q35 = st.radio("**35. Irritado com facilidade?**", esc_padrao, index=None)
             q36 = st.radio("**36. Ansioso?**", esc_padrao, index=None)
-            st.info("**Sugerimos pausar se estiver muito cansado(a).**")
             q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
             
             st.error("### 9. COMPORTAMENTO OFENSIVO")
@@ -136,10 +151,10 @@ with tab1:
         if st.form_submit_button("✅ GRAVAR DIAGNÓSTICO"):
             resps = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
             if None in resps or not emp or not setr:
-                st.error("⚠️ Preencha Empresa/Setor e responda todas as questões.")
+                st.error("⚠️ Responda todas as perguntas.")
             else:
                 try:
-                    # Lógica de Pesos HMM
+                    # Lógica de Cálculo HMM
                     v_dem = (map_dir[q1]+map_dir[q2]+map_dir[q3]+map_dir[q4]+map_dir[q5]+map_dir[q6])/6
                     v_con = (map_inv[q7]+map_inv[q8]+map_inv[q9]+map_inv[q10]+map_inv[q11]+map_inv[q12])/6
                     v_lid = (map_inv[q13]+map_inv[q14]+map_inv[q15]+map_inv[q16]+map_inv[q17]+map_inv[q18]+map_inv[q19]+map_inv[q20]+map_inv[q21]+map_inv[q22])/10
@@ -156,14 +171,14 @@ with tab1:
                     
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-                    st.success("✅ DIAGNÓSTICO ENVIADO COM SUCESSO!")
+                    st.success("✅ DADOS ENVIADOS COM SUCESSO!")
                     st.balloons()
                 except Exception as e: st.error(f"Erro na conexão: {e}")
 
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel de Gestão Ocupacional")
-    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v25_8")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v25_9")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -193,7 +208,7 @@ with tab2:
                         st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
                         
                         sugestoes = {
-                            "Demanda": "Revisar fluxos de trabalho e organização conforme NR-17.",
+                            "Demanda": "Revisar fluxos de trabalho conforme NR-17.",
                             "Controle": "Estimular a autonomia técnica e processos participativos.",
                             "Lideranca": "Desenvolver lideranças com foco em suporte e feedback justo.",
                             "Satisfacao": "Promover reconhecimento e alinhamento de propósito.",
@@ -202,7 +217,7 @@ with tab2:
                         if dim in sugestoes:
                             st.caption(f"👉 **Ação:** {sugestoes[dim]}")
                     st.markdown("---")
-        else: st.info("Aguardando os primeiros registros na planilha.")
+        else: st.info("Aguardando registros na planilha.")
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
