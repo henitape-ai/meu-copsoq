@@ -5,14 +5,16 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V25.7", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V25.8", layout="wide")
 
-# --- OCULTAR ELEMENTOS STREAMLIT (BRANDING HMM) ---
+# --- BLOCO DE ESTILO (BRANDING PROFISSIONAL HMM) ---
+# Esconde Menu, Rodapé, Header e o botão 'Manage App'
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
             footer {visibility: hidden;}
             header {visibility: hidden;}
+            .stAppDeployButton {display: none;}
             </style>
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
@@ -26,7 +28,7 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-# --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES TÉCNICAS ---
+# --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES ---
 with st.container():
     st.markdown("""
     ### 📝 Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho! 
@@ -48,19 +50,19 @@ with st.container():
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
-# --- DICIONÁRIOS DE ESCALAS E PESOS (LÓGICA HMM) ---
+# --- DICIONÁRIOS DE ESCALAS E PESOS (LÓGICA TÉCNICA HMM) ---
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude_qualidade = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# Mapeamento Direto: Sempre = Risco 100 | Nunca = Risco 0
+# Mapeamento Direto: Sempre = Risco 100 (Para Demanda, Saúde Mental, Ofensivo)
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
-# Mapeamento Inverso: Sempre = Risco 0 | Nunca = Risco 100 (Fatores de Proteção)
+# Mapeamento Inverso: Sempre = Risco 0 (Para Autonomia, Liderança, Satisfação)
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 # Mapeamento Saúde
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v25_7", clear_on_submit=True):
+    with st.form("form_v25_8", clear_on_submit=True):
         st.markdown("### 1️⃣ Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -80,8 +82,8 @@ with tab1:
             
             st.info("### 2. SUA AUTONOMIA")
             q7 = st.radio("**7. Consegue decidir como fazer as tarefas?**", esc_padrao, index=None)
-            q8 = st.radio("**8. Exige que você tenha iniciativa própria?**", esc_padrao, index=None)
-            q9 = st.radio("**9. Consegue aprender coisas novas?**", esc_padrao, index=None)
+            q8 = st.radio("**8. O seu trabalho exige que você tenha iniciativa própria?**", esc_padrao, index=None)
+            q9 = st.radio("**9. No seu serviço, você consegue aprender coisas novas?**", esc_padrao, index=None)
             
             st.info("### 3. COMUNICAÇÃO")
             q10 = st.radio("**10. Avisado sobre mudanças e planos futuros?**", esc_padrao, index=None)
@@ -105,7 +107,6 @@ with tab1:
             q23 = st.radio("**23. Sente-se capaz de resolver problemas?**", esc_padrao, index=None)
             q24 = st.radio("**24. Trabalho tem significado importante?**", esc_padrao, index=None)
             q25 = st.radio("**25. Sente que o que faz é importante?**", esc_padrao, index=None)
-            # Pesos inversos no cálculo final
             q26 = st.radio("**26. Problemas da empresa são seus também?**", esc_padrao, index=None)
             q27 = st.radio("**27. No geral, o quanto está satisfeito?**", esc_padrao, index=None)
             
@@ -123,7 +124,8 @@ with tab1:
             q34 = st.radio("**34. Esgotado emocionalmente?**", esc_padrao, index=None)
             q35 = st.radio("**35. Irritado com facilidade?**", esc_padrao, index=None)
             q36 = st.radio("**36. Ansioso?**", esc_padrao, index=None)
-            q37 = st.radio("**37. Triste?**", esc_padrao, index=None)
+            st.info("**Sugerimos pausar se estiver muito cansado(a).**")
+            q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
             
             st.error("### 9. COMPORTAMENTO OFENSIVO")
             q38 = st.radio("**38. Alvo de insultos/provocações?**", esc_padrao, index=None)
@@ -134,10 +136,10 @@ with tab1:
         if st.form_submit_button("✅ GRAVAR DIAGNÓSTICO"):
             resps = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
             if None in resps or not emp or not setr:
-                st.error("⚠️ Responda todas as perguntas.")
+                st.error("⚠️ Preencha Empresa/Setor e responda todas as questões.")
             else:
                 try:
-                    # CÁLCULOS TÉCNICOS (Direto vs Inverso)
+                    # Lógica de Pesos HMM
                     v_dem = (map_dir[q1]+map_dir[q2]+map_dir[q3]+map_dir[q4]+map_dir[q5]+map_dir[q6])/6
                     v_con = (map_inv[q7]+map_inv[q8]+map_inv[q9]+map_inv[q10]+map_inv[q11]+map_inv[q12])/6
                     v_lid = (map_inv[q13]+map_inv[q14]+map_inv[q15]+map_inv[q16]+map_inv[q17]+map_inv[q18]+map_inv[q19]+map_inv[q20]+map_inv[q21]+map_inv[q22])/10
@@ -151,16 +153,17 @@ with tab1:
                         "Demanda": v_dem, "Controle": v_con, "Lideranca": v_lid,
                         "Satisfacao": v_sat, "Saude_Mental": v_men, "Ofensivo": v_ofe
                     }])
+                    
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-                    st.success("✅ DADOS GRAVADOS COM SUCESSO!")
+                    st.success("✅ DIAGNÓSTICO ENVIADO COM SUCESSO!")
                     st.balloons()
-                except Exception as e: st.error(f"Erro: {e}")
+                except Exception as e: st.error(f"Erro na conexão: {e}")
 
 # --- ABA 2: PAINEL ---
 with tab2:
-    st.subheader("🔐 Painel de Gestão HMM")
-    acesso = st.text_input("Senha:", type="password", key="pwd_v25_7")
+    st.subheader("🔐 Painel de Gestão Ocupacional")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v25_8")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -175,30 +178,31 @@ with tab2:
                 
                 m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
                 
+                # Gráfico Radar
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
 
-                st.markdown("### 📋 Médias e Plano de Ação Ocupacional")
+                st.markdown("### 📋 Médias e Parecer de Prevenção")
                 for dim, valor in m.items():
                     if dim == "Ofensivo" and valor > 0:
-                        st.error(f"🚨 **{dim}: {valor:.1f} - ALERTA CRÍTICO**")
-                        st.caption("👉 **Ação:** Auditoria ética imediata e reforço do Canal de Denúncias.")
+                        st.error(f"🚨 **{dim}: {valor:.1f} - ALERTA ÉTICO (CRÍTICO)**")
+                        st.caption("👉 **Ação:** Reforçar canais de denúncia e realizar treinamento de conduta.")
                     else:
                         cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                         st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
                         
                         sugestoes = {
-                            "Demanda": "Revisar distribuição de carga e prazos (NR-17).",
-                            "Controle": "Aumentar autonomia técnica e participação decisória.",
-                            "Lideranca": "Treinamento de Soft Skills e feedbacks constantes.",
-                            "Satisfacao": "Avaliar planos de reconhecimento e valorização.",
-                            "Saude_Mental": "Programas de bem-estar e monitoramento de fadiga."
+                            "Demanda": "Revisar fluxos de trabalho e organização conforme NR-17.",
+                            "Controle": "Estimular a autonomia técnica e processos participativos.",
+                            "Lideranca": "Desenvolver lideranças com foco em suporte e feedback justo.",
+                            "Satisfacao": "Promover reconhecimento e alinhamento de propósito.",
+                            "Saude_Mental": "Monitorar fadiga e implementar pausas de recuperação."
                         }
                         if dim in sugestoes:
                             st.caption(f"👉 **Ação:** {sugestoes[dim]}")
                     st.markdown("---")
-        else: st.warning("Aguardando registros.")
+        else: st.info("Aguardando os primeiros registros na planilha.")
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
