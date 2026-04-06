@@ -43,7 +43,7 @@ with st.container():
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
         st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
-    with col_inst2:
+    with col_inst2
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     st.warning("**AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
