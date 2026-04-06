@@ -63,7 +63,6 @@ with st.container():
     
     st.warning("**AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
     st.markdown("---")
-
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
 # --- DICIONÁRIOS DE ESCALAS E PESOS (LÓGICA TÉCNICA HMM) ---
