@@ -47,8 +47,9 @@ st.markdown("---")
 # --- TEXTO DE BOAS-VINDAS E INSTRUÇÕES ---
 with st.container():
     st.markdown("""
-    ### 📝 Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho! 
-    Suas respostas são **confidenciais** e ajudarão a promover melhorias no local de trabalho. 
+    ### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho! 
+    Suas respostas são **confidenciais** e ajudarão a promover melhorias no local de trabalho.
+    
     Por favor, leia atentamente as opções de resposta antes de iniciar:
     """)
     
@@ -61,7 +62,7 @@ with st.container():
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     
-    st.warning("⚠️ **AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
+    st.warning("**AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
     st.markdown("---")
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
