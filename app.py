@@ -5,9 +5,9 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V26.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V26.1", layout="wide")
 
-# --- BLOCO DE ESTILO (BLINDAGEM TOTAL - DESKTOP, MOBILE E EDGE) ---
+# --- BLOCO DE ESTILO (BLINDAGEM AGRESSIVA - EDGE, CHROME E MOBILE) ---
 hide_st_style = """
             <style>
             /* Esconde Menu, Header e Footer padrão */
@@ -15,11 +15,15 @@ hide_st_style = """
             header {visibility: hidden;}
             footer {visibility: hidden;}
             
-            /* Esconde o botão 'Manage app', status widget e ícones de deploy */
+            /* Esconde o botão 'Manage app', ícone de coroa e widgets de status */
             .stAppDeployButton {display: none !important;}
             #stDecoration {display: none !important;}
             [data-testid="stStatusWidget"] {display: none !important;}
             div[data-testid="stStatusWidget"] {display: none !important;}
+            
+            /* Esconde especificamente os botões flutuantes do canto inferior (Edge/Cloud) */
+            .st-emotion-cache-zq5wmm {display: none !important;}
+            .st-emotion-cache-15zrgzn {display: none !important;}
             
             /* Ajuste de espaçamento para Mobile e remoção de barras de ferramentas */
             .block-container {
@@ -79,7 +83,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v26_0", clear_on_submit=True):
+    with st.form("form_v26_1", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -179,7 +183,7 @@ with tab1:
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel de Gestão Ocupacional")
-    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v26_0")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v26_1")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
