@@ -34,7 +34,7 @@ st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.h
 st.markdown("---")
 
 with st.container():
-    st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!")
+    st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!") Por favor, leia atentamente as opções de resposta antes de iniciar:
     col_inst1, col_inst2 = st.columns(2)
     with col_inst1:
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
