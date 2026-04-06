@@ -5,9 +5,9 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V27.1", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V27.2", layout="wide")
 
-# --- BLOCO DE ESTILO (BLINDAGEM TOTAL) ---
+# --- BLOCO DE ESTILO (BLINDAGEM TOTAL DESKTOP & MOBILE) ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -25,6 +25,7 @@ hide_st_style = """
             """
 st.markdown(hide_st_style, unsafe_allow_html=True)
 
+# CONEXÃO COM GOOGLE SHEETS
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
@@ -33,8 +34,10 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
+# --- TEXTO DE BOAS-VINDAS ---
 with st.container():
-    st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!") (Por favor, leia atentamente as opções de resposta antes de iniciar:)
+    st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!")
+    st.markdown("Por favor, leia atentamente as opções de resposta antes de iniciar:")
     col_inst1, col_inst2 = st.columns(2)
     with col_inst1:
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
@@ -47,15 +50,17 @@ with st.container():
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
+# ESCALAS
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude_qualidade = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
+# MAPAS DE PESOS
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v27_1", clear_on_submit=True):
+    with st.form("form_v27_2", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -72,14 +77,17 @@ with tab1:
             q4 = st.radio("**4. O serviço exige atenção total o tempo todo?**", esc_padrao, index=None)
             q5 = st.radio("**5. Precisa tomar decisões difíceis no dia a dia?**", esc_padrao, index=None)
             q6 = st.radio("**6. Trabalho cansativo emocionalmente?**", esc_padrao, index=None)
+            
             st.info("### 2. SUA AUTONOMIA")
             q7 = st.radio("**7. Consegue decidir como fazer as tarefas?**", esc_padrao, index=None)
             q8 = st.radio("**8. O seu trabalho exige que você tenha iniciativa própria?**", esc_padrao, index=None)
             q9 = st.radio("**9. No seu serviço, você consegue aprender coisas novas?**", esc_padrao, index=None)
+            
             st.info("### 3. COMUNICAÇÃO")
             q10 = st.radio("**10. Avisado sobre mudanças e planos futuros?**", esc_padrao, index=None)
             q11 = st.radio("**11. Recebe informações necessárias?**", esc_padrao, index=None)
             q12 = st.radio("**12. Sabe exatamente suas responsabilidades?**", esc_padrao, index=None)
+            
             st.info("### 4. LIDERANÇA")
             q13 = st.radio("**13. A chefia valoriza o que você faz?**", esc_padrao, index=None)
             q14 = st.radio("**14. Você é tratado de forma justa?**", esc_padrao, index=None)
@@ -99,12 +107,15 @@ with tab1:
             q25 = st.radio("**25. Sente que o que faz é importante?**", esc_padrao, index=None)
             q26 = st.radio("**26. Problemas da empresa são seus também?**", esc_padrao, index=None)
             q27 = st.radio("**27. No geral, o quanto está satisfeito?**", esc_padrao, index=None)
+            
             st.success("### 6. SEGURANÇA E SAÚDE")
             q28 = st.radio("**28. Sente medo de perder o emprego?**", esc_padrao, index=None)
             q29 = st.radio("**29. Como você avalia a sua saúde hoje?**", esc_saude_qualidade, index=None)
+            
             st.success("### 7. TRABALHO E VIDA PESSOAL")
             q30 = st.radio("**30. Trabalho tira energia da vida particular?**", esc_padrao, index=None)
             q31 = st.radio("**31. Trabalho toma muito do tempo privado?**", esc_padrao, index=None)
+            
             st.error("### 8. SAÚDE E BEM ESTAR")
             q32 = st.radio("**32. Dificuldade para dormir?**", esc_padrao, index=None)
             q33 = st.radio("**33. Esgotado fisicamente?**", esc_padrao, index=None)
@@ -112,6 +123,7 @@ with tab1:
             q35 = st.radio("**35. Irritado com facilidade?**", esc_padrao, index=None)
             q36 = st.radio("**36. Sente-se Ansioso?**", esc_padrao, index=None)
             q37 = st.radio("**37. Sente-se triste?**", esc_padrao, index=None)
+            
             st.error("### 9. COMPORTAMENTO OFENSIVO") 
             q38 = st.radio("**38. Você foi alvo de insultos/provocações?**", esc_padrao, index=None)
             q39 = st.radio("**39. Exposto a assédio sexual?**", esc_padrao, index=None)
@@ -124,7 +136,6 @@ with tab1:
                 st.error("⚠️ Responda todas as perguntas.")
             else:
                 try:
-                    # CÁLCULOS TÉCNICOS COM LÓGICA DE SINAL HMM
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -147,7 +158,7 @@ with tab1:
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel de Gestão Ocupacional")
-    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v27_1")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v27_2")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -173,7 +184,7 @@ with tab2:
                 }
                 for dim, valor in m.items():
                     if dim == "Ofensivo":
-                        if valor > 0: st.error(f"🚨 **{dim}: {valor:.1f} - CRÍTICO (ÉTICA)**"); st.caption("👉 Ação: Auditoria interna.")
+                        if valor > 0: st.error(f"🚨 **{dim}: {valor:.1f} - CRÍTICO**"); st.caption("👉 Auditoria interna.")
                         else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE**")
                     else:
                         cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
