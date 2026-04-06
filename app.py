@@ -78,7 +78,7 @@ map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Defic
 
 with tab1:
     with st.form("form_v25_9", clear_on_submit=True):
-        st.markdown("###Identificação Geral")
+        st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
         with c2: setr = st.text_input("Setor:").strip()
