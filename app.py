@@ -5,9 +5,9 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V25.9", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V26.0", layout="wide")
 
-# --- BLOCO DE ESTILO (LIMPEZA TOTAL DESKTOP & MOBILE) ---
+# --- BLOCO DE ESTILO (BLINDAGEM TOTAL - DESKTOP, MOBILE E EDGE) ---
 hide_st_style = """
             <style>
             /* Esconde Menu, Header e Footer padrão */
@@ -15,21 +15,21 @@ hide_st_style = """
             header {visibility: hidden;}
             footer {visibility: hidden;}
             
-            /* Esconde o botão 'Manage app' e botões de deploy (Desktop e Mobile) */
+            /* Esconde o botão 'Manage app', status widget e ícones de deploy */
             .stAppDeployButton {display: none !important;}
-            stDecoration {display: none !important;}
+            #stDecoration {display: none !important;}
+            [data-testid="stStatusWidget"] {display: none !important;}
+            div[data-testid="stStatusWidget"] {display: none !important;}
             
-            /* Remove espaços em branco no topo (ajuste para Mobile) */
+            /* Ajuste de espaçamento para Mobile e remoção de barras de ferramentas */
             .block-container {
                 padding-top: 1rem !important;
                 padding-bottom: 0rem !important;
             }
-            
-            /* Remove a barra de ferramentas flutuante do Streamlit */
             [data-testid="stHeader"] {display: none !important;}
             [data-testid="stToolbar"] {display: none !important;}
-            
-            /* Esconde o botão de 'Manage App' específico do mobile */
+
+            /* Força a remoção de qualquer elemento de rodapé residual */
             footer {display: none !important;}
             </style>
             """
@@ -58,11 +58,13 @@ with st.container():
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
         st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
+    with col_inst2:
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     
     st.warning("**AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
     st.markdown("---")
+
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
 # --- DICIONÁRIOS DE ESCALAS E PESOS (LÓGICA TÉCNICA HMM) ---
@@ -77,7 +79,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v25_9", clear_on_submit=True):
+    with st.form("form_v26_0", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -177,7 +179,7 @@ with tab1:
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel de Gestão Ocupacional")
-    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v25_9")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v26_0")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
