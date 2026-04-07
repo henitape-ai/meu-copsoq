@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V27.4", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V27.5", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM TOTAL) ---
 hide_st_style = """
@@ -52,13 +52,13 @@ tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"]
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# MAPAS DE PESOS (Métricas HMM)
+# MAPAS DE PESOS
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v27_4", clear_on_submit=True):
+    with st.form("form_v27_5", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -75,17 +75,14 @@ with tab1:
             q4 = st.radio("**4. O serviço exige atenção total o tempo todo?**", esc_padrao, index=None)
             q5 = st.radio("**5. Precisa tomar decisões muito difíceis?**", esc_padrao, index=None)
             q6 = st.radio("**6. O trabalho é cansativo emocionalmente?**", esc_padrao, index=None)
-            
             st.info("### 2. SUA AUTONOMIA")
             q7 = st.radio("**7. Consegue decidir como fazer as tarefas?**", esc_padrao, index=None)
             q8 = st.radio("**8. O trabalho exige iniciativa própria?**", esc_padrao, index=None)
             q9 = st.radio("**9. Consegue aprender coisas novas?**", esc_padrao, index=None)
-            
             st.info("### 3. COMUNICAÇÃO")
             q10 = st.radio("**10. Avisado sobre mudanças e planos futuros?**", esc_padrao, index=None)
             q11 = st.radio("**11. Recebe informações necessárias?**", esc_padrao, index=None)
             q12 = st.radio("**12. Sabe exatamente suas responsabilidades?**", esc_padrao, index=None)
-            
             st.info("### 4. LIDERANÇA")
             q13 = st.radio("**13. A chefia valoriza o que você faz?**", esc_padrao, index=None)
             q14 = st.radio("**14. É tratado de forma justa?**", esc_padrao, index=None)
@@ -105,28 +102,23 @@ with tab1:
             q25 = st.radio("**25. Sente que o que faz é importante?**", esc_padrao, index=None)
             q26 = st.radio("**26. Sente que os problemas da empresa são seus?**", esc_padrao, index=None)
             q27 = st.radio("**27. No geral, o quanto está satisfeito?**", esc_padrao, index=None)
-            
-            st.success("### 6. SEGURANÇA")
+            st.success("### 6. SEGURANÇA E SAÚDE")
             q28 = st.radio("**28. Tem medo de perder o emprego?**", esc_padrao, index=None)
             q29 = st.radio("**29. Como você avalia a sua saúde em geral?**", esc_saude, index=None)
-            
             st.success("### 7. VIDA PESSOAL")
             q30 = st.radio("**30. O trabalho tira energia da vida privada?**", esc_padrao, index=None)
             q31 = st.radio("**31. O trabalho toma muito do seu tempo livre?**", esc_padrao, index=None)
-            
-            st.error("### 8. BEM-ESTAR (ÚLTIMAS 4 SEMANAS)")
+            st.error("### 8. BEM-ESTAR")
             q32 = st.radio("**32. Teve dificuldade para dormir?**", esc_padrao, index=None)
             q33 = st.radio("**33. Sentiu-se esgotado fisicamente?**", esc_padrao, index=None)
             q34 = st.radio("**34. Sentiu-se esgotado emocionalmente?**", esc_padrao, index=None)
             q35 = st.radio("**35. Sentiu-se irritado com facilidade?**", esc_padrao, index=None)
             q36 = st.radio("**36. Sentiu-se ansioso?**", esc_padrao, index=None)
             q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
-            
             st.error("### 9. COMPORTAMENTO OFENSIVO") 
             q38 = st.radio("**38. Alvo de insultos ou provocações?**", esc_padrao, index=None)
             q39 = st.radio("**39. Exposto a assédio sexual?**", esc_padrao, index=None)
             q40 = st.radio("**40. Sofreu ameaças de violência?**", esc_padrao, index=None)
-            # Questão 41 finalizando o check métrico
             q41 = st.radio("**41. Sofreu agressão física?**", esc_padrao, index=None)
 
         if st.form_submit_button("✅ ENVIAR DIAGNÓSTICO"):
@@ -135,7 +127,6 @@ with tab1:
                 st.error("⚠️ Responda todas as 41 questões.")
             else:
                 try:
-                    # CÁLCULOS TÉCNICOS (Direto vs Inverso)
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -163,25 +154,23 @@ with tab2:
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
-            df['Empresa'] = df['Empresa'].astype(str).strip()
+            # CORREÇÃO DO ERRO: Uso do .str antes do .strip()
+            df['Empresa'] = df['Empresa'].astype(str).str.strip()
             emp_sel = st.selectbox("Cliente:", sorted(df['Empresa'].unique()), index=None)
             if emp_sel:
                 df_f = df[df['Empresa'] == emp_sel]
                 set_sel = st.multiselect("Setores:", sorted(df_f['Setor'].unique()))
                 if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 
-                # Média Geral ignorando erros de registros antigos (nan)
                 m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
-                
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', fillcolor='rgba(255, 0, 0, 0.3)', line_color='red')
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.markdown("### 📋 Parecer Técnico")
-                # Tratamento de Saude Geral isolado com segurança contra nan
                 if 'Saude_Geral' in df_f.columns:
                     val_sg = df_f['Saude_Geral'].mean()
-                    st.info(f"📌 Autopercepção de Saúde Geral: {val_sg:.1f}" if not pd.isna(val_sg) else "📌 Saúde Geral: Aguardando novos dados.")
+                    if not pd.isna(val_sg): st.info(f"📌 Autopercepção de Saúde Geral: {val_sg:.1f}")
 
                 acoes = {
                     "Demanda": {"baixo": "Monitorar carga.", "medio": "Revisar fluxos.", "alto": "Reduzir carga."},
