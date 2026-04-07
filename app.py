@@ -5,9 +5,9 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V27.2", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V27.3", layout="wide")
 
-# --- BLOCO DE ESTILO (BLINDAGEM TOTAL DESKTOP & MOBILE) ---
+# --- BLOCO DE ESTILO (BLINDAGEM TOTAL DESKTOP, MOBILE & EDGE) ---
 hide_st_style = """
             <style>
             #MainMenu {visibility: hidden;}
@@ -43,6 +43,7 @@ with st.container():
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
         st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
+    with col_inst2:
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     st.warning("**AVALIAÇÃO ANÔNIMA:** A coleta de dados é realizada de forma estritamente anônima e protegida.")
@@ -53,13 +54,13 @@ tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"]
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude_qualidade = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# MAPAS DE PESOS
+# MAPAS DE PESOS (Lógica de Engenharia HMM)
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v27_2", clear_on_submit=True):
+    with st.form("form_v27_3", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -135,29 +136,38 @@ with tab1:
                 st.error("⚠️ Responda todas as perguntas.")
             else:
                 try:
+                    # CÁLCULOS TÉCNICOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
                     v_sat = sum([map_inv[q] for q in [q23,q24,q25,q26,q27]]) / 5
-                    v_men = (map_dir[q28]+map_saude[q29]+sum([map_dir[q] for q in [q30,q31,q32,q33,q34,q35,q36,q37]])) / 10
+                    
+                    # Saúde Geral isolada e Saúde Mental consolidada
+                    v_saude_geral = map_saude[q29]
+                    v_men = (map_dir[q28] + v_saude_geral + sum([map_dir[q] for q in [q30,q31,q32,q33,q34,q35,q36,q37]])) / 10
+                    
                     v_ofe = sum([map_dir[q] for q in [q38,q39,q40,q41]]) / 4
                     
                     nova_linha = pd.DataFrame([{
                         "Data": datetime.now().strftime("%d/%m/%Y %H:%M"),
                         "Empresa": emp, "Setor": setr, "Funcao": func, "Idade": idade_val,
                         "Demanda": v_dem, "Controle": v_con, "Lideranca": v_lid,
-                        "Satisfacao": v_sat, "Saude_Mental": v_men, "Ofensivo": v_ofe
+                        "Satisfacao": v_sat, 
+                        "Saude_Geral": v_saude_geral, # NOVA COLUNA ISOLADA
+                        "Saude_Mental": v_men, 
+                        "Ofensivo": v_ofe
                     }])
+                    
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-                    st.success("✅ DADOS ENVIADOS COM SUCESSO!")
+                    st.success("✅ DADOS GRAVADOS COM SUCESSO!")
                     st.balloons()
-                except Exception as e: st.error(f"Erro: {e}")
+                except Exception as e: st.error(f"Erro na gravação: {e}")
 
 # --- ABA 2: PAINEL ---
 with tab2:
     st.subheader("🔐 Painel de Gestão Ocupacional")
-    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v27_2")
+    acesso = st.text_input("Senha de Consultor:", type="password", key="pwd_v27_3")
     if acesso == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
@@ -168,12 +178,17 @@ with tab2:
                 set_sel = st.multiselect("Filtrar Setores:", sorted(df_f['Setor'].unique()))
                 if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 
+                # Exibição no Radar (Mantemos as dimensões principais)
                 m = df_f[['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']].mean()
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', line_color='red', fillcolor='rgba(255, 0, 0, 0.3)')
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.markdown("### 📋 Médias e Parecer de Prevenção HMM")
+                
+                # Média específica da Saúde Geral para o Parecer
+                m_saude_geral = df_f['Saude_Geral'].mean()
+
                 acoes_hmm = {
                     "Demanda": {"baixo": "Monitorar carga.", "medio": "Revisar fluxos.", "alto": "Reduzir carga urgente."},
                     "Controle": {"baixo": "Boa autonomia.", "medio": "Estimular decisão.", "alto": "Aumentar autonomia."},
@@ -181,16 +196,21 @@ with tab2:
                     "Satisfacao": {"baixo": "Bom engajamento.", "medio": "Valorizar equipe.", "alto": "Risco de turnover."},
                     "Saude_Mental": {"baixo": "Saúde preservada.", "medio": "Pausas ativas.", "alto": "Apoio psicológico."}
                 }
+                
+                # Exibição dos Pareceres
                 for dim, valor in m.items():
                     if dim == "Ofensivo":
-                        if valor > 0: st.error(f"🚨 **{dim}: {valor:.1f} - CRÍTICO**"); st.caption("👉 Auditoria interna.")
+                        if valor > 0: st.error(f"🚨 **{dim}: {valor:.1f} - CRÍTICO (ÉTICA)**"); st.caption("👉 Ação: Auditoria interna.")
                         else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE**")
                     else:
                         cor = "green" if valor < 33 else "orange" if valor < 66 else "red"
                         faixa = "baixo" if valor < 33 else "medio" if valor < 66 else "alto"
                         st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
-                        if dim in acoes_hmm: st.caption(f"👉 Ação: {acoes_hmm[dim][faixa]}")
+                        if dim in acoes_hmm: st.caption(f"👉 Ação Sugerida: {acoes_hmm[dim][faixa]}")
                     st.markdown("---")
+                
+                # Nota Extra: Saúde Geral (Percepção)
+                st.info(f"📌 **Nota Adicional - Autopercepção de Saúde Geral:** {m_saude_geral:.1f}")
         else: st.info("Aguardando registros.")
 
 st.markdown("---")
