@@ -57,11 +57,11 @@ map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "D
 
 with tab1:
     with st.form("form_v27_9", clear_on_submit=True):
-        st.markdown("### 1️⃣ Identificação Geral")
+        st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
         with c2: setr = st.text_input("Setor:").strip()
-        with c3: func = st.text_input("Função (Opcional):").strip()
+        with c3: func = st.text_input("Função:").strip()
         with c4: idade_val = st.number_input("Idade:", min_value=14, max_value=100, value=30)
 
         st.markdown("---")
