@@ -74,7 +74,7 @@ with tab1:
         q2 = st.radio("**2. Com que frequência falta tempo para terminar todas as tarefas?**", esc_padrao, index=None)
         q3 = st.radio("**3. Você precisa trabalhar num ritmo muito acelerado?**", esc_padrao, index=None)
         q4 = st.radio("**4. O serviço exige a sua atenção constante e total?**", esc_padrao, index=None)
-        q5 = st.radio("**5. No seu dia a dia, precisa de tomar decisões muito difíceis?**", esc_padrao, index=None)
+        q5 = st.radio("**5. No seu dia a dia, precisa tomar decisões muito difíceis?**", esc_padrao, index=None)
         q6 = st.radio("**6. Considera o seu trabalho cansativo do ponto de vista emocional?**", esc_padrao, index=None)
         
         st.info("### 2. SUA AUTONOMIA (Controle sobre o Trabalho)")
