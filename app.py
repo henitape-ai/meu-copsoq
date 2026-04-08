@@ -27,7 +27,7 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
-st.title("Avaliação de Riscos Psicossociais")
+st.title("Avaliação de Comportamentos no Ambiente de Trabalho")
 st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
@@ -41,7 +41,6 @@ with st.container():
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
         st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
-    with col_inst2:
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     st.warning("**AVALIAÇÃO ANÔNIMA:** Coleta estritamente anônima e protegida.")
@@ -117,7 +116,7 @@ with tab1:
             q37 = st.radio("**37. Sentiu-se triste?**", esc_padrao, index=None)
             st.error("### 9. COMPORTAMENTO OFENSIVO") 
             q38 = st.radio("**38. Alvo de insultos ou provocações?**", esc_padrao, index=None)
-            q39 = st.radio("**39. Exposto a assédio sexual?**", esc_padrao, index=None)
+            q39 = st.radio("**39. Alvo de investidas sexuais indesejadas?**", esc_padrao, index=None)
             q40 = st.radio("**40. Sofreu ameaças de violência?**", esc_padrao, index=None)
             q41 = st.radio("**41. Sofreu agressão física?**", esc_padrao, index=None)
 
