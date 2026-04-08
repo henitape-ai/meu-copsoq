@@ -42,7 +42,7 @@ with st.container():
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
-    st.warning("**AVALIAÇÃO ANÔNIMA:** Coleta estritamente anônima e protegida conforme normas de ética laboral.")
+    st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas serão confidenciais.")
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
@@ -117,11 +117,11 @@ with tab1:
         q34 = st.radio("**34. Sentiu-se exausto emocionalmente?**", esc_padrao, index=None)
         q35 = st.radio("**35. Sentiu-se irritado com facilidade?**", esc_padrao, index=None)
         q36 = st.radio("**36. Sentiu-se ansioso ou tenso?**", esc_padrao, index=None)
-        q37 = st.radio("**37. Sentiu-se triste ou em baixo?**", esc_padrao, index=None)
+        q37 = st.radio("**37. Sentiu-se triste ou desanimado?**", esc_padrao, index=None)
         
         st.error("### 9. COMPORTAMENTO OFENSIVO") 
         q38 = st.radio("**38. Alvo de insultos ou provocações verbais?**", esc_padrao, index=None)
-        q39 = st.radio("**39. Exposto a investidas sexuais indesejadas?**", esc_padrao, index=None)
+        q39 = st.radio("**39. Exposto (a) a investidas sexuais indesejadas?**", esc_padrao, index=None)
         q40 = st.radio("**40. Sofreu ameaças de violência no trabalho?**", esc_padrao, index=None)
         q41 = st.radio("**41. Sofreu agressão física?**", esc_padrao, index=None)
 
