@@ -115,7 +115,7 @@ with tab1:
         q31 = st.radio("**31. O trabalho toma-lhe muito do tempo da sua vida privada?**", esc_padrao, index=None)
         
         st.error("### 8. BEM-ESTAR E SAÚDE MENTAL (Últimas 4 semanas)")
-        q32 = st.radio("**32. Teve dificuldade em adormecer ou dormir seguido?**", esc_padrao, index=None)
+        q32 = st.radio("**32. Tem sentido dificuldade em iniciar ou manter o sono?**", esc_padrao, index=None)
         q33 = st.radio("**33. Sentiu-se exausto fisicamente?**", esc_padrao, index=None)
         q34 = st.radio("**34. Sentiu-se exausto emocionalmente?**", esc_padrao, index=None)
         q35 = st.radio("**35. Sentiu-se irritado com facilidade?**", esc_padrao, index=None)
