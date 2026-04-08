@@ -120,7 +120,7 @@ with tab1:
         q34 = st.radio("**34. Sentiu-se exausto emocionalmente?**", esc_padrao, index=None)
         q35 = st.radio("**35. Sentiu-se irritado com facilidade?**", esc_padrao, index=None)
         q36 = st.radio("**36. Sentiu-se ansioso ou tenso?**", esc_padrao, index=None)
-        q37 = st.radio("**37. Sentiu-se triste ou em baixo?**", esc_padrao, index=None)
+        q37 = st.radio("**37. Sentiu-se triste ou desanimado?**", esc_padrao, index=None)
         
         st.error("### 9. COMPORTAMENTO OFENSIVO") 
         q38 = st.radio("**38. Foi alvo de insultos ou provocações verbais?**", esc_padrao, index=None)
