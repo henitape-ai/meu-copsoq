@@ -27,7 +27,7 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- CABEÇALHO ---
-st.title("Avaliação de Comportamentos no Ambiente de Trabalho")
+st.title("LEVANTAMENTO DAS CONDIÇÕES E ORGANIZAÇÃO DO TRABALHO")
 st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
