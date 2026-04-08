@@ -44,7 +44,7 @@ with st.container():
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
-    st.warning("**AVALIAÇÃO ANÔNIMA:** Coleta estritamente anônima e protegida conforme normas de ética laboral.")
+    st.warning("**AVALIAÇÃO ANÔNIMA:** Seus dados estão protegidos e a participação é estritamente confidencial.")
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
