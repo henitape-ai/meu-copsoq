@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V27.9", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V28.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -40,6 +40,7 @@ with st.container():
         st.write("- **NUNCA:** não ocorre em nenhuma situação.")
         st.write("- **RARAMENTE:** ocorre em pouquíssimas situações.")
         st.write("- **ÀS VEZES:** ocorre em algumas situações, mas não é frequente.")
+    with col_inst2:
         st.write("- **FREQUENTEMENTE:** ocorre na maioria das situações.")
         st.write("- **SEMPRE:** ocorre em todas as situações.")
     st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas serão confidenciais.")
@@ -56,7 +57,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v27_9", clear_on_submit=True):
+    with st.form("form_v28_0", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -131,6 +132,7 @@ with tab1:
                 st.error("⚠️ Responda todas as 41 questões.")
             else:
                 try:
+                    # CÁLCULOS DOS 9 ITENS AGREGADOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -147,9 +149,9 @@ with tab1:
                     }])
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-                    st.success("✅ DADOS GRAVADOS!")
+                    st.success("✅ DADOS GRAVADOS COM SUCESSO!")
                     st.balloons()
-                except Exception as e: st.error(f"Erro: {e}")
+                except Exception as e: st.error(f"Erro na conexão com GSheets: {e}")
 
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
@@ -165,11 +167,11 @@ with tab2:
                 set_sel = st.multiselect("Filtrar Setores:", sorted(df_f['Setor'].unique()))
                 if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 
-                # Garantir ordem das colunas para o Radar
+                # Definição das categorias para o Radar
                 categorias = ['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']
                 m = df_f[categorias].mean()
                 
-                # Gráfico Radar com margens ampliadas para evitar cortes
+                # Gráfico Radar configurado para não cortar rótulos e mostrar valores decimais
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', fillcolor='rgba(255, 0, 0, 0.3)', line_color='red')
                 fig.update_layout(
@@ -208,7 +210,7 @@ with tab2:
                         st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
                         if dim in acoes: st.caption(f"👉 Ação Sugerida: {acoes[dim][faixa]}")
                     st.markdown("---")
-        else: st.info("Aguardando registros.")
+        else: st.info("Aguardando registros na base de dados.")
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
