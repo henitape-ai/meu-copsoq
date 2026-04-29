@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V29.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V30.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -30,22 +30,27 @@ st.subheader("HMM Serviços - Engenharia de Segurança do Trabalho")
 st.markdown(f"**Responsável Técnico:** Henrique Motta de Miranda | 🌐 [www.hmmservicos.com.br](http://www.hmmservicos.com.br)")
 st.markdown("---")
 
-# --- TEXTO DE BOAS-VINDAS E EXPLICAÇÃO TÉCNICA ---
+# --- TEXTO DE BOAS-VINDAS E ORIENTAÇÕES FIXAS ---
 with st.container():
     st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!")
     st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas são confidenciais e protegidas por algoritmos de integridade.")
     
-    with st.expander("🔍 Entenda a Escala de Resposta (Metodologia COPSOQ II / HMM)"):
-        st.markdown("""
-        Cada opção possui um peso técnico para o cálculo dos indicadores de risco:
-        * **SEMPRE:** A situação ocorre em 100% do tempo laboral.
-        * **FREQUENTEMENTE:** A situação ocorre em cerca de 75% do tempo.
-        * **ÀS VEZES:** A situação ocorre em cerca de 50% do tempo (equilíbrio).
-        * **RARAMENTE:** A situação ocorre em apenas 25% do tempo.
-        * **NUNCA:** A situação é inexistente no dia a dia (0%).
-        
-        *Nota técnica: Para indicadores de Risco (Demanda, Saúde Mental, Ofensivo), quanto mais próximo de **Nunca**, mais seguro é o ambiente.*
-        """)
+    # Bloco Fixo de Orientações Metodológicas
+    st.markdown("""
+    <div style="border: 1px solid #e6e9ef; padding: 20px; border-radius: 10px; background-color: #f8f9fb; margin-bottom: 20px;">
+        <h4 style="margin-top:0; color: #1f3d5a;">🔍 Orientações sobre a Escala de Resposta:</h4>
+        <p>Por favor, leia atentamente as opções antes de responder cada questão:</p>
+        <ul style="list-style-type: none; padding-left: 0;">
+            <li><b>• NUNCA:</b> não ocorre em nenhuma situação (0%).</li>
+            <li><b>• RARAMENTE:</b> ocorre em pouquíssimas situações (25%).</li>
+            <li><b>• ÀS VEZES:</b> ocorre em algumas situações (50%).</li>
+            <li><b>• FREQUENTEMENTE:</b> ocorre na maioria das situações (75%).</li>
+            <li><b>• SEMPRE:</b> ocorre em todas as situações (100%).</li>
+        </ul>
+        <hr style="margin: 10px 0; border: 0.5px solid #d1d5db;">
+        <small style="color: #6b7280;"><i><b>Nota técnica:</b> Este diagnóstico segue o protocolo internacional COPSOQ II. Para indicadores de Risco (Demanda, Ofensivo), quanto mais próximo de <b>Nunca</b>, mais seguro é o ambiente laboral.</i></small>
+    </div>
+    """, unsafe_allow_html=True)
 
 tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"])
 
@@ -53,13 +58,13 @@ tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"]
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# MAPAS DE PESOS (Lógica HMM)
+# MAPAS DE PESOS (Lógica HMM para Engenharia de Segurança)
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v29_0", clear_on_submit=True):
+    with st.form("form_v30_0", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -134,17 +139,16 @@ with tab1:
                 st.error("⚠️ Responda todas as 41 questões.")
             else:
                 try:
-                    # --- ALGORITMO DE INTEGRIDADE HMM ---
-                    pesos_integridade = [map_dir.get(q, 50) for q in resps if q in map_dir]
-                    std_dev = np.std(pesos_integridade)
+                    # --- ALGORITMO DE INTEGRIDADE HMM (PERICIAL) ---
+                    pesos_val = [map_dir.get(q, 50) for q in resps if q in map_dir]
+                    std_dev = np.std(pesos_val)
                     
-                    # Verificação de contradição Q12 vs Q10
-                    # (Se sabe responsabilidades mas nunca é avisado de mudanças)
-                    gap_logico = abs(map_dir[q12] - map_dir[q10])
+                    # Dissonância: Sabe responsabilidades (Q12) vs Recebe Info (Q11)
+                    gap_info = abs(map_dir[q12] - map_dir[q11])
                     
                     status_int = "Confiável"
                     if std_dev < 10: status_int = "Inconsistente (Polarização)"
-                    if gap_logico > 75: status_int = "Inconsistente (Contradição)"
+                    if gap_info > 75: status_int = "Inconsistente (Dissonância Lógica)"
                     
                     # CÁLCULOS DOS 9 ITENS AGREGADOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
@@ -166,25 +170,27 @@ with tab1:
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
                     st.success("✅ DADOS GRAVADOS COM SUCESSO!")
                     st.balloons()
-                except Exception as e: st.error(f"Erro na conexão: {e}")
+                except Exception as e: st.error(f"Erro na gravação: {e}")
 
 # --- ABA 2: PAINEL DE GESTÃO ---
 with tab2:
-    st.subheader("🔐 Painel de Consultoria HMM")
+    st.subheader("🔐 Painel de Consultoria Especializada HMM")
     if st.text_input("Senha de Acesso Profissional:", type="password") == "HMM2024":
         df = conn.read(worksheet="Página1", ttl=0)
         if not df.empty:
             df['Empresa'] = df['Empresa'].astype(str).str.strip()
             
             # Filtro de Integridade Estratégico
-            if st.checkbox("Filtrar apenas dados com Integridade Confirmada"):
+            st.sidebar.markdown("### Filtros de Auditoria")
+            solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=True)
+            if solo_confiavel:
                 df = df[df['Integridade'] == "Confiável"]
             
-            emp_sel = st.selectbox("Selecione o Cliente para Análise:", sorted(df['Empresa'].unique()), index=None)
+            emp_sel = st.selectbox("Selecione o Cliente:", sorted(df['Empresa'].unique()), index=None)
             
             if emp_sel:
                 df_f = df[df['Empresa'] == emp_sel]
-                set_sel = st.multiselect("Filtrar Setores específicos:", sorted(df_f['Setor'].unique()))
+                set_sel = st.multiselect("Filtrar por Setor:", sorted(df_f['Setor'].unique()))
                 if set_sel: df_f = df_f[df_f['Setor'].isin(set_sel)]
                 
                 categorias = ['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']
@@ -195,35 +201,36 @@ with tab2:
                 fig.update_traces(fill='toself', fillcolor='rgba(0, 0, 255, 0.2)', line_color='navy')
                 fig.update_layout(
                     polar=dict(
-                        radialaxis=dict(visible=True, range=[0, 100]),
-                        angularaxis=dict(rotation=90, direction="clockwise")
+                        radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(size=10)),
+                        angularaxis=dict(rotation=90, direction="clockwise", tickfont=dict(size=12))
                     ),
-                    showlegend=False
+                    showlegend=False,
+                    margin=dict(l=80, r=80, t=20, b=20)
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
                 st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
                 
-                acoes = {
-                    "Demanda": {"baixo": "Monitorar carga.", "medio": "Revisar fluxos de trabalho.", "alto": "Reduzir sobrecarga urgente."},
+                acoes_hmm = {
+                    "Demanda": {"baixo": "Carga em conformidade.", "medio": "Revisar fluxos técnicos.", "alto": "Reduzir sobrecarga urgente."},
                     "Controle": {"baixo": "Autonomia preservada.", "medio": "Aumentar participação.", "alto": "Intervir na gestão técnica."},
-                    "Lideranca": {"baixo": "Suporte adequado.", "medio": "Treinar Soft Skills.", "alto": "Reciclar gestão de pessoas."},
-                    "Satisfacao": {"baixo": "Engajamento alto.", "medio": "Reforçar reconhecimento.", "alto": "Risco de turnover/passivo."},
-                    "Saude_Mental": {"baixo": "Equilíbrio detectado.", "medio": "Pausas ativas sugeridas.", "alto": "Apoio psicossocial imediato."}
+                    "Lideranca": {"baixo": "Liderança protetiva.", "medio": "Treinar gestores.", "alto": "Reciclar suporte social."},
+                    "Satisfacao": {"baixo": "Alto engajamento.", "medio": "Reforçar valorização.", "alto": "Risco de turnover/passivo."},
+                    "Saude_Mental": {"baixo": "Indicadores estáveis.", "medio": "Pausas ativas sugeridas.", "alto": "Apoio psicossocial imediato."}
                 }
                 
                 for dim, valor in m.items():
                     if dim == "Ofensivo":
                         if valor > 0: 
-                            st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO** (Exige Auditoria)")
+                            st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO** (Investigação Imediata)")
                         else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE ÉTICA**")
                     else:
                         cor = "green" if valor < 33.4 else "orange" if valor < 66.7 else "red"
                         faixa = "baixo" if valor < 33.4 else "medio" if valor < 66.7 else "alto"
                         st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
-                        if dim in acoes: st.caption(f"🎯 **Medida de Prevenção:** {acoes[dim][faixa]}")
+                        if dim in acoes_hmm: st.caption(f"🎯 **Medida de Prevenção:** {acoes_hmm[dim][faixa]}")
                     st.markdown("---")
-        else: st.info("Aguardando registros na base de dados.")
+        else: st.info("Base de dados vazia.")
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
