@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V30.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V31.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -35,7 +35,6 @@ with st.container():
     st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!")
     st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas são confidenciais e protegidas por algoritmos de integridade.")
     
-    # Bloco Fixo de Orientações Metodológicas
     st.markdown("""
     <div style="border: 1px solid #e6e9ef; padding: 20px; border-radius: 10px; background-color: #f8f9fb; margin-bottom: 20px;">
         <h4 style="margin-top:0; color: #1f3d5a;">🔍 Orientações sobre a Escala de Resposta:</h4>
@@ -58,13 +57,13 @@ tab1, tab2 = st.tabs(["📝 Formulário de Coleta", "📊 Painel de Resultados"]
 esc_padrao = ["Sempre", "Frequentemente", "As vezes", "Raramente", "Nunca"]
 esc_saude = ["Excelente", "Muito Boa", "Boa", "Razoável", "Deficitária"]
 
-# MAPAS DE PESOS (Lógica HMM para Engenharia de Segurança)
+# MAPAS DE PESOS (Lógica HMM)
 map_dir = {"Sempre": 100, "Frequentemente": 75, "As vezes": 50, "Raramente": 25, "Nunca": 0}
 map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "Nunca": 100}
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v30_0", clear_on_submit=True):
+    with st.form("form_v31_0", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -139,18 +138,14 @@ with tab1:
                 st.error("⚠️ Responda todas as 41 questões.")
             else:
                 try:
-                    # --- ALGORITMO DE INTEGRIDADE HMM (PERICIAL) ---
                     pesos_val = [map_dir.get(q, 50) for q in resps if q in map_dir]
                     std_dev = np.std(pesos_val)
-                    
-                    # Dissonância: Sabe responsabilidades (Q12) vs Recebe Info (Q11)
                     gap_info = abs(map_dir[q12] - map_dir[q11])
                     
                     status_int = "Confiável"
                     if std_dev < 10: status_int = "Inconsistente (Polarização)"
-                    if gap_info > 75: status_int = "Inconsistente (Dissonância Lógica)"
+                    if gap_info > 75: status_int = "Inconsistente (Dissonância)"
                     
-                    # CÁLCULOS DOS 9 ITENS AGREGADOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -180,12 +175,16 @@ with tab2:
         if not df.empty:
             df['Empresa'] = df['Empresa'].astype(str).str.strip()
             
-            # Filtro de Integridade Estratégico
+            # FILTRO DE INTEGRIDADE COM BLINDAGEM PARA KeyError
             st.sidebar.markdown("### Filtros de Auditoria")
-            solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=True)
-            if solo_confiavel:
-                df = df[df['Integridade'] == "Confiável"]
+            solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=False)
             
+            if solo_confiavel:
+                if 'Integridade' in df.columns:
+                    df = df[df['Integridade'] == "Confiável"]
+                else:
+                    st.sidebar.warning("⚠️ Coluna 'Integridade' não encontrada no Sheets.")
+
             emp_sel = st.selectbox("Selecione o Cliente:", sorted(df['Empresa'].unique()), index=None)
             
             if emp_sel:
@@ -196,7 +195,6 @@ with tab2:
                 categorias = ['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']
                 m = df_f[categorias].mean()
                 
-                # Gráfico Radar HMM
                 fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
                 fig.update_traces(fill='toself', fillcolor='rgba(0, 0, 255, 0.2)', line_color='navy')
                 fig.update_layout(
@@ -222,7 +220,7 @@ with tab2:
                 for dim, valor in m.items():
                     if dim == "Ofensivo":
                         if valor > 0: 
-                            st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO** (Investigação Imediata)")
+                            st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO**")
                         else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE ÉTICA**")
                     else:
                         cor = "green" if valor < 33.4 else "orange" if valor < 66.7 else "red"
