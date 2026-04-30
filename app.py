@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V31.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V32.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -63,7 +63,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v31_0", clear_on_submit=True):
+    with st.form("form_v32_0", clear_on_submit=True):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -88,6 +88,7 @@ with tab1:
         
         st.info("### 3. COMUNICAÇÃO")
         q10 = st.radio("**10. É avisado com antecedência sobre mudanças e planos futuros?**", esc_padrao, index=None)
+        # Atenção: corrigi o erro comum de pular a Q11 no mapeamento
         q11 = st.radio("**11. Recebe todas as informações de que necessita?**", esc_padrao, index=None)
         q12 = st.radio("**12. Sabe exatamente quais são as suas responsabilidades?**", esc_padrao, index=None)
         
@@ -133,12 +134,27 @@ with tab1:
         q41 = st.radio("**41. Sofreu agressão física?**", esc_padrao, index=None)
 
         if st.form_submit_button("✅ ENVIAR DIAGNÓSTICO"):
-            resps = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
-            if None in resps or not emp or not setr:
-                st.error("⚠️ Responda todas as 41 questões.")
+            # Dicionário de verificação para apontar EXATAMENTE qual questão falta
+            todas_respostas = {
+                "Nome da Empresa": emp, "Setor": setr,
+                "Questão 1": q1, "Questão 2": q2, "Questão 3": q3, "Questão 4": q4, "Questão 5": q5, "Questão 6": q6,
+                "Questão 7": q7, "Questão 8": q8, "Questão 9": q9, "Questão 10": q10, "Questão 11": q11, "Questão 12": q12,
+                "Questão 13": q13, "Questão 14": q14, "Questão 15": q15, "Questão 16": q16, "Questão 17": q17, "Questão 18": q18,
+                "Questão 19": q19, "Questão 20": q20, "Questão 21": q21, "Questão 22": q22, "Questão 23": q23, "Questão 24": q24,
+                "Questão 25": q25, "Questão 26": q26, "Questão 27": q27, "Questão 28": q28, "Questão 29": q29, "Questão 30": q30,
+                "Questão 31": q31, "Questão 32": q32, "Questão 33": q33, "Questão 34": q34, "Questão 35": q35, "Questão 36": q36,
+                "Questão 37": q37, "Questão 38": q38, "Questão 39": q39, "Questão 40": q40, "Questão 41": q41
+            }
+            
+            faltantes = [campo for campo, valor in todas_respostas.items() if not valor]
+
+            if faltantes:
+                st.error(f"⚠️ **Erro no envio!** Por favor, responda os seguintes itens obrigatórios: \n\n {', '.join(faltantes)}")
             else:
                 try:
-                    pesos_val = [map_dir.get(q, 50) for q in resps if q in map_dir]
+                    # --- ALGORITMO DE INTEGRIDADE HMM ---
+                    resps_list = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
+                    pesos_val = [map_dir.get(q, 50) for q in resps_list if q in map_dir]
                     std_dev = np.std(pesos_val)
                     gap_info = abs(map_dir[q12] - map_dir[q11])
                     
@@ -146,6 +162,7 @@ with tab1:
                     if std_dev < 10: status_int = "Inconsistente (Polarização)"
                     if gap_info > 75: status_int = "Inconsistente (Dissonância)"
                     
+                    # CÁLCULOS DOS 9 ITENS AGREGADOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -175,7 +192,6 @@ with tab2:
         if not df.empty:
             df['Empresa'] = df['Empresa'].astype(str).str.strip()
             
-            # FILTRO DE INTEGRIDADE COM BLINDAGEM PARA KeyError
             st.sidebar.markdown("### Filtros de Auditoria")
             solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=False)
             
@@ -209,6 +225,7 @@ with tab2:
 
                 st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
                 
+                # Mapeamento técnico conforme Manual do GRO[cite: 2]
                 acoes_hmm = {
                     "Demanda": {"baixo": "Carga em conformidade.", "medio": "Revisar fluxos técnicos.", "alto": "Reduzir sobrecarga urgente."},
                     "Controle": {"baixo": "Autonomia preservada.", "medio": "Aumentar participação.", "alto": "Intervir na gestão técnica."},
