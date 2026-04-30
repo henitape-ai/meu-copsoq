@@ -37,7 +37,7 @@ with st.container():
     
     st.markdown("""
     <div style="border: 1px solid #e6e9ef; padding: 20px; border-radius: 10px; background-color: #f8f9fb; margin-bottom: 20px;">
-        <h4 style="margin-top:0; color: #1f3d5a;">🔍 Orientações sobre a Escala de Resposta:</h4>
+        <h4 style="margin-top:0; color: #1f3d5a;"> Orientações sobre a Escala de Resposta:</h4>
         <p>Por favor, leia atentamente as opções antes de responder cada questão:</p>
         <ul style="list-style-type: none; padding-left: 0;">
             <li><b>• NUNCA:</b> não ocorre em nenhuma situação.</li>
@@ -47,7 +47,7 @@ with st.container():
             <li><b>• SEMPRE:</b> ocorre em todas as situações.</li>
         </ul>
         <hr style="margin: 10px 0; border: 0.5px solid #d1d5db;">
-        <small style="color: #6b7280;"><i><b>Nota técnica:</b> Este diagnóstico segue o protocolo internacional COPSOQ II. Para indicadores de Risco (Demanda, Ofensivo), quanto mais próximo de <b>Nunca</b>, mais seguro é o ambiente laboral.</i></small>
+        <small style="color: #6b7280;"><i><b>Nota técnica:</b> Este diagnóstico segue o protocolo internacional COPSOQ II. </i></small>
     </div>
     """, unsafe_allow_html=True)
 
