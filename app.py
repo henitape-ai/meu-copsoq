@@ -47,7 +47,7 @@ with st.container():
             <li><b>• SEMPRE:</b> ocorre em todas as situações.</li>
         </ul>
         <hr style="margin: 10px 0; border: 0.5px solid #d1d5db;">
-        <small style="color: #6b7280;"><i><b>Nota técnica:</b> Este diagnóstico segue o protocolo internacional COPSOQ II. </i></small>
+        <small style="color: #6b7280;"><i><b>Este diagnóstico segue o protocolo internacional COPSOQ II. </i></small>
     </div>
     """, unsafe_allow_html=True)
 
