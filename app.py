@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V32.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V31.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -63,8 +63,8 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v32_0", clear_on_submit=True):
-        st.markdown("### Identificação Geral")
+    with st.form("form_v31_0", clear_on_submit=True):
+        st.markdown("### Identification Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
         with c2: setr = st.text_input("Setor:").strip()
@@ -88,7 +88,6 @@ with tab1:
         
         st.info("### 3. COMUNICAÇÃO")
         q10 = st.radio("**10. É avisado com antecedência sobre mudanças e planos futuros?**", esc_padrao, index=None)
-        # Atenção: corrigi o erro comum de pular a Q11 no mapeamento
         q11 = st.radio("**11. Recebe todas as informações de que necessita?**", esc_padrao, index=None)
         q12 = st.radio("**12. Sabe exatamente quais são as suas responsabilidades?**", esc_padrao, index=None)
         
@@ -134,7 +133,6 @@ with tab1:
         q41 = st.radio("**41. Sofreu agressão física?**", esc_padrao, index=None)
 
         if st.form_submit_button("✅ ENVIAR DIAGNÓSTICO"):
-            # Dicionário de verificação para apontar EXATAMENTE qual questão falta
             todas_respostas = {
                 "Nome da Empresa": emp, "Setor": setr,
                 "Questão 1": q1, "Questão 2": q2, "Questão 3": q3, "Questão 4": q4, "Questão 5": q5, "Questão 6": q6,
@@ -152,6 +150,15 @@ with tab1:
                 st.error(f"⚠️ **Erro no envio!** Por favor, responda os seguintes itens obrigatórios: \n\n {', '.join(faltantes)}")
             else:
                 try:
+                    # --- MAPEAMENTO E ANÁLISE COMPLEMENTAR DO ITEM 09 (OFENSIVO) ---
+                    ofensivos_detalhados = []
+                    if q38 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q38 (Insultos/Provocações)")
+                    if q39 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q39 (Investidas Sexuais)")
+                    if q40 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q40 (Ameaças)")
+                    if q41 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q41 (Agressão Física)")
+                    
+                    det_ofensivo = ", ".join(ofensivos_detalhados) if ofensivos_detalhados else "Nenhum desvio crítico"
+
                     # --- ALGORITMO DE INTEGRIDADE HMM ---
                     resps_list = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
                     pesos_val = [map_dir.get(q, 50) for q in resps_list if q in map_dir]
@@ -176,7 +183,8 @@ with tab1:
                         "Empresa": emp, "Setor": setr, "Funcao": func, "Idade": idade_val,
                         "Demanda": v_dem, "Controle": v_con, "Lideranca": v_lid,
                         "Satisfacao": v_sat, "Saude_Geral": v_sg, "Saude_Mental": v_men, "Ofensivo": v_ofe,
-                        "Integridade": status_int
+                        "Integridade": status_int,
+                        "Detalhe_Ofensivo": det_ofensivo
                     }])
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
@@ -192,6 +200,7 @@ with tab2:
         if not df.empty:
             df['Empresa'] = df['Empresa'].astype(str).str.strip()
             
+            # FILTRO DE INTEGRIDADE COM BLINDAGEM PARA KeyError
             st.sidebar.markdown("### Filtros de Auditoria")
             solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=False)
             
@@ -225,7 +234,14 @@ with tab2:
 
                 st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
                 
-                # Mapeamento técnico conforme Manual do GRO[cite: 2]
+                # EXIBIÇÃO EXCLUSIVA DE DESVIOS ÉTICOS MAPEADOS POR QUESTÃO (EXCLUSIVO DO CONSULTOR)
+                if "Detalhe_Ofensivo" in df_f.columns:
+                    alertas_reais = df_f[df_f['Detalhe_Ofensivo'] != "Nenhum desvio crítico"]['Detalhe_Ofensivo'].dropna()
+                    if not alertas_reais.empty:
+                        st.warning("⚠️ **Histórico de Condutas Inadequadas Sinalizadas na Base:**")
+                        for item in alertas_reais.unique():
+                            st.write(f"• {item}")
+                
                 acoes_hmm = {
                     "Demanda": {"baixo": "Carga em conformidade.", "medio": "Revisar fluxos técnicos.", "alto": "Reduzir sobrecarga urgente."},
                     "Controle": {"baixo": "Autonomia preservada.", "medio": "Aumentar participação.", "alto": "Intervir na gestão técnica."},
