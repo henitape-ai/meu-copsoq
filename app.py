@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V31.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V34.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -63,8 +63,8 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v31_0", clear_on_submit=True):
-        st.markdown("### Identification Geral")
+    with st.form("form_v34_0", clear_on_submit=True):
+        st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
         with c2: setr = st.text_input("Setor:").strip()
@@ -150,12 +150,13 @@ with tab1:
                 st.error(f"⚠️ **Erro no envio!** Por favor, responda os seguintes itens obrigatórios: \n\n {', '.join(faltantes)}")
             else:
                 try:
-                    # --- MAPEAMENTO E ANÁLISE COMPLEMENTAR DO ITEM 09 (OFENSIVO) ---
+                    # --- GATILHOS DA OPÇÃO 02: CAPTURA QUALQUER RESPOSTA ALÉM DE 'NUNCA' ---
+                    gatilhos_ofensivos = ["Sempre", "Frequentemente", "As vezes", "Raramente"]
                     ofensivos_detalhados = []
-                    if q38 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q38 (Insultos/Provocações)")
-                    if q39 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q39 (Investidas Sexuais)")
-                    if q40 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q40 (Ameaças)")
-                    if q41 in ["Sempre", "Frequentemente", "As vezes"]: ofensivos_detalhados.append("Q41 (Agressão Física)")
+                    if q38 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q38 ({q38})")
+                    if q39 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q39 ({q39})")
+                    if q40 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q40 ({q40})")
+                    if q41 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q41 ({q41})")
                     
                     det_ofensivo = ", ".join(ofensivos_detalhados) if ofensivos_detalhados else "Nenhum desvio crítico"
 
@@ -188,7 +189,7 @@ with tab1:
                     }])
                     df_b = conn.read(worksheet="Página1", ttl=0)
                     conn.update(worksheet="Página1", data=pd.concat([df_b, nova_linha], ignore_index=True))
-                    st.success("✅ DADOS GRAVADOS COM SUCESSO!")
+                    st.success("DADOS GRAVADOS COM SUCESSO!")
                     st.balloons()
                 except Exception as e: st.error(f"Erro na gravação: {e}")
 
@@ -200,7 +201,6 @@ with tab2:
         if not df.empty:
             df['Empresa'] = df['Empresa'].astype(str).str.strip()
             
-            # FILTRO DE INTEGRIDADE COM BLINDAGEM PARA KeyError
             st.sidebar.markdown("### Filtros de Auditoria")
             solo_confiavel = st.sidebar.checkbox("Excluir amostras inconsistentes", value=False)
             
@@ -234,11 +234,11 @@ with tab2:
 
                 st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
                 
-                # EXIBIÇÃO EXCLUSIVA DE DESVIOS ÉTICOS MAPEADOS POR QUESTÃO (EXCLUSIVO DO CONSULTOR)
+                # Exibição aprimorada na Aba de Gestão
                 if "Detalhe_Ofensivo" in df_f.columns:
                     alertas_reais = df_f[df_f['Detalhe_Ofensivo'] != "Nenhum desvio crítico"]['Detalhe_Ofensivo'].dropna()
                     if not alertas_reais.empty:
-                        st.warning("⚠️ **Histórico de Condutas Inadequadas Sinalizadas na Base:**")
+                        st.warning("⚠️ **Histórico de Condutas Inadequadas Sinalizadas na Base (Incluindo Nível Raramente):**")
                         for item in alertas_reais.unique():
                             st.write(f"• {item}")
                 
