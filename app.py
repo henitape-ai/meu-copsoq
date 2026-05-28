@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V34.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V35.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -63,7 +63,8 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v34_0", clear_on_submit=True):
+    # ALTERADO clear_on_submit para False para reter as marcações em caso de erro de preenchimento
+    with st.form("form_v35_0", clear_on_submit=False):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -150,7 +151,7 @@ with tab1:
                 st.error(f"⚠️ **Erro no envio!** Por favor, responda os seguintes itens obrigatórios: \n\n {', '.join(faltantes)}")
             else:
                 try:
-                    # --- GATILHOS DA OPÇÃO 02: CAPTURA QUALQUER RESPOSTA ALÉM DE 'NUNCA' ---
+                    # --- GATILHOS DA OPÇÃO 02: RASTREABILIDADE TOTAL ACIMA DE 'NUNCA' ---
                     gatilhos_ofensivos = ["Sempre", "Frequentemente", "As vezes", "Raramente"]
                     ofensivos_detalhados = []
                     if q38 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q38 ({q38})")
@@ -234,7 +235,7 @@ with tab2:
 
                 st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
                 
-                # Exibição aprimorada na Aba de Gestão
+                # Exibição de Alertas do Item 09 no Painel do Consultor
                 if "Detalhe_Ofensivo" in df_f.columns:
                     alertas_reais = df_f[df_f['Detalhe_Ofensivo'] != "Nenhum desvio crítico"]['Detalhe_Ofensivo'].dropna()
                     if not alertas_reais.empty:
