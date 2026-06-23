@@ -1,12 +1,13 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 from streamlit_gsheets import GSheetsConnection
 from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V35.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V36.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -63,8 +64,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    # ALTERADO clear_on_submit para False para reter as marcações em caso de erro de preenchimento
-    with st.form("form_v35_0", clear_on_submit=False):
+    with st.form("form_v36_0", clear_on_submit=False):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -151,7 +151,6 @@ with tab1:
                 st.error(f"⚠️ **Erro no envio!** Por favor, responda os seguintes itens obrigatórios: \n\n {', '.join(faltantes)}")
             else:
                 try:
-                    # --- GATILHOS DA OPÇÃO 02: RASTREABILIDADE TOTAL ACIMA DE 'NUNCA' ---
                     gatilhos_ofensivos = ["Sempre", "Frequentemente", "As vezes", "Raramente"]
                     ofensivos_detalhados = []
                     if q38 in gatilhos_ofensivos: ofensivos_detalhados.append(f"Q38 ({q38})")
@@ -161,7 +160,6 @@ with tab1:
                     
                     det_ofensivo = ", ".join(ofensivos_detalhados) if ofensivos_detalhados else "Nenhum desvio crítico"
 
-                    # --- ALGORITMO DE INTEGRIDADE HMM ---
                     resps_list = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15,q16,q17,q18,q19,q20,q21,q22,q23,q24,q25,q26,q27,q28,q29,q30,q31,q32,q33,q34,q35,q36,q37,q38,q39,q40,q41]
                     pesos_val = [map_dir.get(q, 50) for q in resps_list if q in map_dir]
                     std_dev = np.std(pesos_val)
@@ -171,7 +169,6 @@ with tab1:
                     if std_dev < 10: status_int = "Inconsistente (Polarização)"
                     if gap_info > 75: status_int = "Inconsistente (Dissonância)"
                     
-                    # CÁLCULOS DOS 9 ITENS AGREGADOS
                     v_dem = sum([map_dir[q] for q in [q1,q2,q3,q4,q5,q6]]) / 6
                     v_con = sum([map_inv[q] for q in [q7,q8,q9,q10,q11,q12]]) / 6
                     v_lid = sum([map_inv[q] for q in [q13,q14,q15,q16,q17,q18,q19,q20,q21,q22]]) / 10
@@ -194,7 +191,7 @@ with tab1:
                     st.balloons()
                 except Exception as e: st.error(f"Erro na gravação: {e}")
 
-# --- ABA 2: PAINEL DE GESTÃO ---
+# --- ABA 2: PAINEL DE GESTÃO (INTEGRANDO COPSOQ II + KARASEK) ---
 with tab2:
     st.subheader("🔐 Painel de Consultoria Especializada HMM")
     if st.text_input("Senha de Acesso Profissional:", type="password") == "HMM2024":
@@ -208,8 +205,6 @@ with tab2:
             if solo_confiavel:
                 if 'Integridade' in df.columns:
                     df = df[df['Integridade'] == "Confiável"]
-                else:
-                    st.sidebar.warning("⚠️ Coluna 'Integridade' não encontrada no Sheets.")
 
             emp_sel = st.selectbox("Selecione o Cliente:", sorted(df['Empresa'].unique()), index=None)
             
@@ -221,47 +216,94 @@ with tab2:
                 categorias = ['Demanda', 'Controle', 'Lideranca', 'Satisfacao', 'Saude_Mental', 'Ofensivo']
                 m = df_f[categorias].mean()
                 
-                fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
-                fig.update_traces(fill='toself', fillcolor='rgba(0, 0, 255, 0.2)', line_color='navy')
-                fig.update_layout(
-                    polar=dict(
-                        radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(size=10)),
-                        angularaxis=dict(rotation=90, direction="clockwise", tickfont=dict(size=12))
-                    ),
-                    showlegend=False,
-                    margin=dict(l=80, r=80, t=20, b=20)
-                )
-                st.plotly_chart(fig, use_container_width=True)
+                # Divisão visual em sub-abas no Painel
+                p_tab1, p_tab2 = st.tabs(["📊 Protocolo COPSOQ II (NR-01)", "🧘 Matriz de Karasek (NR-17)"])
+                
+                with p_tab1:
+                    st.markdown("### Gráfico Radar Psicossocial Organizacional")
+                    fig = px.line_polar(r=m.values, theta=m.index, line_close=True, range_r=[0,100])
+                    fig.update_traces(fill='toself', fillcolor='rgba(0, 0, 255, 0.2)', line_color='navy')
+                    fig.update_layout(
+                        polar=dict(
+                            radialaxis=dict(visible=True, range=[0, 100], tickfont=dict(size=10)),
+                            angularaxis=dict(rotation=90, direction="clockwise", tickfont=dict(size=12))
+                        ),
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
-                st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
+                    st.markdown("### 📋 Parecer de Nível de Risco Ocupacional (NR-01)")
+                    if "Detalhe_Ofensivo" in df_f.columns:
+                        alertas_reais = df_f[df_f['Detalhe_Ofensivo'] != "Nenhum desvio crítico"]['Detalhe_Ofensivo'].dropna()
+                        if not alertas_reais.empty:
+                            st.warning("⚠️ **Histórico de Condutas Inadequadas Sinalizadas na Base (Incluindo Nível Raramente):**")
+                            for item in alertas_reais.unique():
+                                st.write(f"• {item}")
+                    
+                    acoes_hmm = {
+                        "Demanda": {"baixo": "Carga em conformidade.", "medio": "Revisar fluxos técnicos.", "alto": "Reduzir sobrecarga urgente."},
+                        "Controle": {"baixo": "Autonomia preservada.", "medio": "Aumentar participação.", "alto": "Intervir na gestão técnica."},
+                        "Lideranca": {"baixo": "Liderança protetiva.", "medio": "Treinar gestores.", "alto": "Reciclar suporte social."},
+                        "Satisfacao": {"baixo": "Alto engajamento.", "medio": "Reforçar valorização.", "alto": "Risco de turnover/passivo."},
+                        "Saude_Mental": {"baixo": "Indicadores estáveis.", "medio": "Pausas ativas sugeridas.", "alto": "Apoio psicossocial imediato."}
+                    }
+                    
+                    for dim, valor in m.items():
+                        if dim == "Ofensivo":
+                            if valor > 0: st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO**")
+                            else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE ÉTICA**")
+                        else:
+                            cor = "green" if valor < 33.4 else "orange" if valor < 66.7 else "red"
+                            faixa = "baixo" if valor < 33.4 else "medio" if valor < 66.7 else "alto"
+                            st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
+                            if dim in acoes_hmm: st.caption(f"🎯 **Medida de Prevenção:** {acoes_hmm[dim][faixa]}")
+                        st.markdown("---")
                 
-                # Exibição de Alertas do Item 09 no Painel do Consultor
-                if "Detalhe_Ofensivo" in df_f.columns:
-                    alertas_reais = df_f[df_f['Detalhe_Ofensivo'] != "Nenhum desvio crítico"]['Detalhe_Ofensivo'].dropna()
-                    if not alertas_reais.empty:
-                        st.warning("⚠️ **Histórico de Condutas Inadequadas Sinalizadas na Base (Incluindo Nível Raramente):**")
-                        for item in alertas_reais.unique():
-                            st.write(f"• {item}")
-                
-                acoes_hmm = {
-                    "Demanda": {"baixo": "Carga em conformidade.", "medio": "Revisar fluxos técnicos.", "alto": "Reduzir sobrecarga urgente."},
-                    "Controle": {"baixo": "Autonomia preservada.", "medio": "Aumentar participação.", "alto": "Intervir na gestão técnica."},
-                    "Lideranca": {"baixo": "Liderança protetiva.", "medio": "Treinar gestores.", "alto": "Reciclar suporte social."},
-                    "Satisfacao": {"baixo": "Alto engajamento.", "medio": "Reforçar valorização.", "alto": "Risco de turnover/passivo."},
-                    "Saude_Mental": {"baixo": "Indicadores estáveis.", "medio": "Pausas ativas sugeridas.", "alto": "Apoio psicossocial imediato."}
-                }
-                
-                for dim, valor in m.items():
-                    if dim == "Ofensivo":
-                        if valor > 0: 
-                            st.error(f"🚨 **{dim}: {valor:.2f} - ALERTA ÉTICO**")
-                        else: st.success(f"✅ **{dim}: {valor:.1f} - CONFORMIDADE ÉTICA**")
+                with p_tab2:
+                    st.markdown("### Quadrantes do Modelo Demanda-Controle de Karasek")
+                    
+                    # Inversão do Controle para o gráfico de Karasek (onde Alto Controle/Autonomia é protetivo)
+                    # COPSOQ mede Controle invertido (0=Melhor, 100=Pior). Para Karasek, transformamos em (100 - valor)
+                    x_controle = 100 - m['Controle']
+                    y_demanda = m['Demanda']
+                    
+                    # Definição do Quadrante com base no ponto de corte mediano (50 pontos)
+                    if y_demanda >= 50 and x_controle < 50:
+                        quadrante = "Trabalho de Alta Exigência (High Strain)"
+                        detalhe_q = "🔴 **Risco Máximo de Adoecimento:** Alta pressão de tempo e baixa autonomia técnico-operatória."
+                    elif y_demanda >= 50 and x_controle >= 50:
+                        quadrante = "Trabalho Ativo (Active Job)"
+                        detalhe_q = "🔵 **Alta Motivação e Aprendizado:** Desafios elevados, mas com alta autonomia para resolvê-los."
+                    elif y_demanda < 50 and x_controle < 50:
+                        quadrante = "Trabalho Passivo (Passive Job)"
+                        detalhe_q = "🟡 **Risco de Monotonia e Desmotivação:** Baixa cobrança, porém sem espaço para crescimento ou iniciativa."
                     else:
-                        cor = "green" if valor < 33.4 else "orange" if valor < 66.7 else "red"
-                        faixa = "baixo" if valor < 33.4 else "medio" if valor < 66.7 else "alto"
-                        st.markdown(f"**{dim}:** :{cor}[{valor:.1f}]")
-                        if dim in acoes_hmm: st.caption(f"🎯 **Medida de Prevenção:** {acoes_hmm[dim][faixa]}")
-                    st.markdown("---")
+                        quadrante = "Trabalho de Baixa Exigência (Low Strain)"
+                        detalhe_q = "🟢 **Ambiente Confortável e Seguro:** Baixas demandas e excelente controle sobre o ritmo."
+
+                    # Geração do Gráfico de Quadrantes Interativo via Plotly
+                    fig_k = go.Figure()
+                    fig_k.add_shape(type="rect", x0=0, y0=50, x1=50, y1=100, fillcolor="rgba(255,0,0,0.1)", line_width=0) # Alta Exigência
+                    fig_k.add_shape(type="rect", x0=50, y0=50, x1=100, y1=100, fillcolor="rgba(0,0,255,0.1)", line_width=0) # Trabalho Ativo
+                    fig_k.add_shape(type="rect", x0=0, y0=0, x1=50, y1=50, fillcolor="rgba(255,255,0,0.1)", line_width=0) # Trabalho Passivo
+                    fig_k.add_shape(type="rect", x0=50, y0=0, x1=100, y1=50, fillcolor="rgba(0,255,0,0.1)", line_width=0) # Baixa Exigência
+                    
+                    fig_k.add_trace(go.Scatter(x=[x_controle], y=[y_demanda], mode='markers+text', 
+                                               marker=dict(size=14, color='black', symbol='diamond'),
+                                               text=[f" {emp_sel}"], textposition="top right"))
+                    
+                    fig_k.update_layout(
+                        xaxis=dict(title="CONTROLE (Autonomia / Uso de Habilidades)", range=[0,100], fixedrange=True),
+                        yaxis=dict(title="DEMANDA (Carga / Ritmo de Trabalho)", range=[0,100], fixedrange=True),
+                        margin=dict(l=40, r=40, t=20, b=40),
+                        showlegend=False
+                    )
+                    st.plotly_chart(fig_k, use_container_width=True)
+                    
+                    st.markdown(f"#### **Diagnóstico Ergonômico Organizacional (NR-17):**")
+                    st.markdown(f"O setor selecionado está classificado como: **{quadrante}**")
+                    st.info(detalhe_q)
+                    
         else: st.info("Base de dados vazia.")
 
 st.markdown("---")
