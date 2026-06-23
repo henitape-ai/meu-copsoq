@@ -1,3 +1,14 @@
+Henrique, é perfeitamente possível incluir a explicação detalhada de cada quadrante na tela do painel! Isso vai deixar o seu aplicativo ainda mais profissional, permitindo que você consulte o significado técnico de cada zona diretamente na tela enquanto analisa os dados do cliente.
+
+Para fazer isso de forma limpa, utilizei o componente `st.popover` do Streamlit. Ele cria um botão elegante na interface que, ao ser clicado, abre uma janela suspensa com o resumo conceitual de todos os quadrantes, sem poluir o visual do gráfico.
+
+Aqui está o código atualizado da **V37.0** focado na **Aba 2 (Painel de Resultados)**. Substitua o código anterior por este para ativar as descrições na interface:
+
+---
+
+### **CÓDIGO COMPLETO ATUALIZADO: `app.py` (V37.0)**
+
+```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -7,7 +18,7 @@ from datetime import datetime
 import numpy as np
 
 # 1. CONFIGURAÇÕES TÉCNICAS HMM
-st.set_page_config(page_title="HMM - Gestão Ocupacional V36.0", layout="wide")
+st.set_page_config(page_title="HMM - Gestão Ocupacional V37.0", layout="wide")
 
 # --- BLOCO DE ESTILO (BLINDAGEM E AJUSTE DE VISUALIZAÇÃO) ---
 hide_st_style = """
@@ -64,7 +75,7 @@ map_inv = {"Sempre": 0, "Frequentemente": 25, "As vezes": 50, "Raramente": 75, "
 map_saude_val = {"Excelente": 0, "Muito Boa": 25, "Boa": 50, "Razoável": 75, "Deficitária": 100}
 
 with tab1:
-    with st.form("form_v36_0", clear_on_submit=False):
+    with st.form("form_v37_0", clear_on_submit=False):
         st.markdown("### Identificação Geral")
         c1, c2, c3, c4 = st.columns(4)
         with c1: emp = st.text_input("Empresa Cliente:").strip()
@@ -260,10 +271,29 @@ with tab2:
                         st.markdown("---")
                 
                 with p_tab2:
-                    st.markdown("### Quadrantes do Modelo Demanda-Controle de Karasek")
+                    # TÍTULO E AJUSTE DO BOTÃO POPOVER PARA CONSULTA CONCEITUAL
+                    c_tit, c_pop = st.columns([3, 1])
+                    with c_tit:
+                        st.markdown("### Quadrantes do Modelo Demanda-Controle de Karasek")
+                    with c_pop:
+                        with st.popover("📖 Legenda e Significado dos Quadrantes"):
+                            st.markdown("""
+                            ### Significado dos Quadrantes de Karasek (NR-17):
+                            
+                            * 🔵 **Trabalho Ativo (Alta Demanda / Alto Controle):** 
+                            O ritmo e volume de trabalho são elevados, porém os colaboradores possuem ampla autonomia técnico-operatória para organizar as tarefas e propor soluções. Promove **motivação, aprendizado e crescimento profissional**.
+                            
+                            * 🔴 **Alta Exigência / Alta Tensão (Alta Demanda / Baixo Controle):** 
+                            **Zona de Risco Crítico.** Pressão de tempo severa associada a prazos rígidos, combinada com nenhuma ou baixíssima autonomia. Cenário com altíssima correlação com distúrbios psicossomáticos, esgotamento físico/mental (*Burnout*) e passivos jurídicos.
+                            
+                            * 🟡 **Trabalho Passivo (Baixa Demanda / Baixo Controle):** 
+                            O ritmo operacional é calmo ou reduzido, mas os funcionários não possuem margem de decisão ou incentivo à iniciativa. Risco voltado ao desenvolvimento de **monotonia laboral, apatia operacional e desmotivação crônica**.
+                            
+                            * 🟢 **Baixa Exigência (Baixa Demanda / Alto Controle):** 
+                            Ambiente confortável e seguro. Baixa pressão temporal combinada com excelente autonomia sobre os métodos operatórios. Indicadores estáveis com baixo potencial gerador de estresse ocupacional.
+                            """)
                     
                     # Inversão do Controle para o gráfico de Karasek (onde Alto Controle/Autonomia é protetivo)
-                    # COPSOQ mede Controle invertido (0=Melhor, 100=Pior). Para Karasek, transformamos em (100 - valor)
                     x_controle = 100 - m['Controle']
                     y_demanda = m['Demanda']
                     
@@ -308,3 +338,5 @@ with tab2:
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
+
+```
