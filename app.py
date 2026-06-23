@@ -1,14 +1,3 @@
-Henrique, é perfeitamente possível incluir a explicação detalhada de cada quadrante na tela do painel! Isso vai deixar o seu aplicativo ainda mais profissional, permitindo que você consulte o significado técnico de cada zona diretamente na tela enquanto analisa os dados do cliente.
-
-Para fazer isso de forma limpa, utilizei o componente `st.popover` do Streamlit. Ele cria um botão elegante na interface que, ao ser clicado, abre uma janela suspensa com o resumo conceitual de todos os quadrantes, sem poluir o visual do gráfico.
-
-Aqui está o código atualizado da **V37.0** focado na **Aba 2 (Painel de Resultados)**. Substitua o código anterior por este para ativar as descrições na interface:
-
----
-
-### **CÓDIGO COMPLETO ATUALIZADO: `app.py` (V37.0)**
-
-```python
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -338,5 +327,3 @@ with tab2:
 
 st.markdown("---")
 st.caption("© 2026 HMM Serviços - Engenharia de Segurança do Trabalho.")
-
-```
