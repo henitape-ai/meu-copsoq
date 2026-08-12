@@ -34,7 +34,7 @@ st.markdown("---")
 # --- TEXTO DE BOAS-VINDAS E ORIENTAÇÕES FIXAS ---
 with st.container():
     st.markdown("### Bem-vindo(a) à pesquisa sobre comportamentos no ambiente de trabalho!")
-    st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas são confidenciais e protegidas por algoritmos de integridade.")
+    st.warning("**AVALIAÇÃO ANÔNIMA:** Suas respostas são confidenciais e protegidas.")
     
     st.markdown("""
     <div style="border: 1px solid #e6e9ef; padding: 20px; border-radius: 10px; background-color: #f8f9fb; margin-bottom: 20px;">
